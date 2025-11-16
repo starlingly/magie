@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MAGIE Companion - Therapeutic Self-Exploration with AI</title>
     <meta name="description" content="A guide for therapeutic self-exploration with artificial intelligence. Build your practice, create your Primer, and track your healing journey.">
+
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
 /* ===== MAGIE Companion Styles ===== */
 
@@ -901,6 +905,127 @@ summary {
     animation: scaleIn 0.3s ease;
 }
 
+/* Auth Modal Specific */
+.auth-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 0.75rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.auth-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.auth-form {
+    display: none;
+}
+
+.auth-form.active {
+    display: block;
+}
+
+.auth-error {
+    background-color: #FEE;
+    color: var(--error-color);
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.auth-error.hidden {
+    display: none;
+}
+
+.auth-success {
+    background-color: #EFE;
+    color: var(--success-color);
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.auth-success.hidden {
+    display: none;
+}
+
+.user-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.user-menu-button {
+    background: none;
+    border: 2px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-medium);
+    transition: var(--transition);
+}
+
+.user-menu-button:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.user-menu-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    min-width: 200px;
+    z-index: 1000;
+}
+
+.user-menu-dropdown.hidden {
+    display: none;
+}
+
+.user-menu-item {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-dark);
+    transition: var(--transition);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.user-menu-item:last-child {
+    border-bottom: none;
+}
+
+.user-menu-item:hover {
+    background-color: var(--bg-light);
+    color: var(--primary-color);
+}
+
 @keyframes scaleIn {
     from {
         transform: scale(0.9);
@@ -1090,7 +1215,7 @@ summary {
                 </div>
 
                 <div class="returning-user">
-                    <a href="#" onclick="showDashboard(); return false;">I'm Returning →</a>
+                    <a href="#" onclick="handleReturningUser(); return false;">I'm Returning →</a>
                 </div>
             </div>
 
@@ -1577,7 +1702,10 @@ summary {
         <section id="view-dashboard" class="view">
             <div class="dashboard-header">
                 <h1>Welcome Back, <span id="dashboard-name">Friend</span></h1>
-                <button class="btn-text" onclick="showView('view-resources')">Resources</button>
+                <div>
+                    <button class="btn-text" onclick="showView('view-resources')">Resources</button>
+                    <button class="btn-text" id="sign-out-btn" onclick="handleSignOut()" style="display:none; margin-left: 1rem; color: var(--text-light);">Sign Out</button>
+                </div>
             </div>
 
             <div class="dashboard-stats">
@@ -1675,10 +1803,258 @@ summary {
         </div>
     </div>
 
+    <!-- Authentication Modal -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeAuthModal()">×</button>
+            <h2>Welcome to MAGIE</h2>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('signin')">Sign In</button>
+                <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+            </div>
+
+            <div id="auth-error" class="auth-error hidden"></div>
+            <div id="auth-success" class="auth-success hidden"></div>
+
+            <!-- Sign In Form -->
+            <form id="signin-form" class="auth-form active" onsubmit="handleSignIn(event)">
+                <div class="form-group">
+                    <label for="signin-email">Email</label>
+                    <input type="email" id="signin-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signin-password">Password</label>
+                    <input type="password" id="signin-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+
+            <!-- Sign Up Form -->
+            <form id="signup-form" class="auth-form" onsubmit="handleSignUp(event)">
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" required minlength="6">
+                    <small>At least 6 characters</small>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password-confirm">Confirm Password</label>
+                    <input type="password" id="signup-password-confirm" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary">Create Account</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Copy Confirmation Toast -->
     <div id="copy-toast" class="toast hidden">✓ Copied to clipboard!</div>
 
     <script>
+/* ===== MAGIE Companion - Supabase Configuration ===== */
+
+// IMPORTANT: Replace these with your actual Supabase credentials
+// Get these from your Supabase project dashboard: Settings > API
+const SUPABASE_URL = 'YOUR_PROJECT_URL_HERE';
+const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
+
+// Initialize Supabase client
+let supabase = null;
+let currentUser = null;
+
+function initSupabase() {
+    if (SUPABASE_URL === 'YOUR_PROJECT_URL_HERE' || SUPABASE_ANON_KEY === 'YOUR_ANON_KEY_HERE') {
+        console.warn('Supabase not configured. Running in localStorage-only mode.');
+        console.warn('Follow SUPABASE_SETUP.md to enable cloud sync.');
+        return false;
+    }
+
+    try {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('Supabase initialized successfully');
+        return true;
+    } catch (error) {
+        console.error('Failed to initialize Supabase:', error);
+        return false;
+    }
+}
+
+// Check authentication state on load
+async function checkAuth() {
+    if (!supabase) return null;
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+        currentUser = session.user;
+        return currentUser;
+    }
+    return null;
+}
+
+// Listen for auth changes
+function setupAuthListener() {
+    if (!supabase) return;
+
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN') {
+            currentUser = session.user;
+            console.log('User signed in:', currentUser.email);
+            closeAuthModal();
+            // Reload user data from Supabase
+            loadUserDataFromSupabase();
+        } else if (event === 'SIGNED_OUT') {
+            currentUser = null;
+            console.log('User signed out');
+            // Clear local data and return to landing
+            MAGIE_Storage.clearAll();
+            location.reload();
+        }
+    });
+}
+
+/* ===== Authentication Functions ===== */
+
+function showAuthModal() {
+    document.getElementById('auth-modal').classList.remove('hidden');
+    clearAuthMessages();
+}
+
+function closeAuthModal() {
+    document.getElementById('auth-modal').classList.add('hidden');
+    clearAuthMessages();
+}
+
+function switchAuthTab(tab) {
+    // Update tab buttons
+    document.querySelectorAll('.auth-tab').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+
+    // Update forms
+    document.querySelectorAll('.auth-form').forEach(form => {
+        form.classList.remove('active');
+    });
+
+    if (tab === 'signin') {
+        document.getElementById('signin-form').classList.add('active');
+    } else {
+        document.getElementById('signup-form').classList.add('active');
+    }
+
+    clearAuthMessages();
+}
+
+function clearAuthMessages() {
+    document.getElementById('auth-error').classList.add('hidden');
+    document.getElementById('auth-success').classList.add('hidden');
+}
+
+function showAuthError(message) {
+    const errorEl = document.getElementById('auth-error');
+    errorEl.textContent = message;
+    errorEl.classList.remove('hidden');
+}
+
+function showAuthSuccess(message) {
+    const successEl = document.getElementById('auth-success');
+    successEl.textContent = message;
+    successEl.classList.remove('hidden');
+}
+
+async function handleSignUp(event) {
+    event.preventDefault();
+    clearAuthMessages();
+
+    if (!supabase) {
+        showAuthError('Supabase is not configured. Please set up Supabase first.');
+        return;
+    }
+
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const passwordConfirm = document.getElementById('signup-password-confirm').value;
+
+    if (password !== passwordConfirm) {
+        showAuthError('Passwords do not match');
+        return;
+    }
+
+    try {
+        const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+        });
+
+        if (error) throw error;
+
+        showAuthSuccess('Account created! Please check your email to confirm your account.');
+
+        // Clear form
+        document.getElementById('signup-form').reset();
+
+        // Auto-sign in if email confirmation is disabled
+        if (data.session) {
+            setTimeout(() => {
+                closeAuthModal();
+                initializeApp();
+            }, 2000);
+        }
+    } catch (error) {
+        showAuthError(error.message);
+    }
+}
+
+async function handleSignIn(event) {
+    event.preventDefault();
+    clearAuthMessages();
+
+    if (!supabase) {
+        showAuthError('Supabase is not configured. Please set up Supabase first.');
+        return;
+    }
+
+    const email = document.getElementById('signin-email').value;
+    const password = document.getElementById('signin-password').value;
+
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        if (error) throw error;
+
+        currentUser = data.user;
+        closeAuthModal();
+
+        // Load user data and show dashboard
+        await loadUserDataFromSupabase();
+        showDashboard();
+    } catch (error) {
+        showAuthError(error.message);
+    }
+}
+
+async function handleSignOut() {
+    if (!supabase) return;
+
+    try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+
+        // Clear local storage and reload
+        MAGIE_Storage.clearAll();
+        location.reload();
+    } catch (error) {
+        console.error('Sign out error:', error);
+        alert('Error signing out. Please try again.');
+    }
+}
+
 /* ===== MAGIE Companion - Storage Management ===== */
 
 const MAGIE_Storage = {
@@ -1944,27 +2320,293 @@ const MAGIE_Storage = {
     hasPrimer() {
         const primer = this.getPrimer();
         return primer && primer.name && primer.intro;
+    },
+
+    /* ===== Supabase Sync Functions ===== */
+
+    // Save primer to Supabase
+    async syncPrimerToSupabase(primer) {
+        if (!supabase || !currentUser) return;
+
+        try {
+            // Check if primer exists
+            const { data: existing } = await supabase
+                .from('primers')
+                .select('id')
+                .eq('user_id', currentUser.id)
+                .single();
+
+            const primerData = {
+                user_id: currentUser.id,
+                name: primer.name,
+                intro: primer.intro,
+                themes: primer.themes || [],
+                themes_other: primer.themesOther || '',
+                style: primer.style || [],
+                communication: primer.communication || '',
+                goals: primer.goals || '',
+                selected_ai: primer.selectedAI || '',
+                updated_at: new Date().toISOString()
+            };
+
+            if (existing) {
+                // Update existing primer
+                const { error } = await supabase
+                    .from('primers')
+                    .update(primerData)
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+            } else {
+                // Insert new primer
+                primerData.created_at = new Date().toISOString();
+                const { error } = await supabase
+                    .from('primers')
+                    .insert([primerData]);
+
+                if (error) throw error;
+            }
+
+            console.log('Primer synced to Supabase');
+        } catch (error) {
+            console.error('Error syncing primer:', error);
+        }
+    },
+
+    // Load primer from Supabase
+    async loadPrimerFromSupabase() {
+        if (!supabase || !currentUser) return null;
+
+        try {
+            const { data, error } = await supabase
+                .from('primers')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .single();
+
+            if (error) {
+                if (error.code === 'PGRST116') {
+                    // No primer found, return null
+                    return null;
+                }
+                throw error;
+            }
+
+            // Convert to local format
+            const primer = {
+                name: data.name,
+                intro: data.intro,
+                themes: data.themes || [],
+                themesOther: data.themes_other,
+                style: data.style || [],
+                communication: data.communication,
+                goals: data.goals,
+                selectedAI: data.selected_ai,
+                createdAt: data.created_at,
+                updatedAt: data.updated_at
+            };
+
+            // Save to localStorage
+            localStorage.setItem(this.KEYS.PRIMER, JSON.stringify(primer));
+            return primer;
+        } catch (error) {
+            console.error('Error loading primer:', error);
+            return null;
+        }
+    },
+
+    // Sync session to Supabase
+    async syncSessionToSupabase(session) {
+        if (!supabase || !currentUser) return;
+
+        try {
+            const sessionData = {
+                user_id: currentUser.id,
+                session_type: session.type,
+                note: session.note,
+                created_at: session.timestamp
+            };
+
+            const { error } = await supabase
+                .from('sessions')
+                .insert([sessionData]);
+
+            if (error) throw error;
+
+            console.log('Session synced to Supabase');
+        } catch (error) {
+            console.error('Error syncing session:', error);
+        }
+    },
+
+    // Load sessions from Supabase
+    async loadSessionsFromSupabase() {
+        if (!supabase || !currentUser) return [];
+
+        try {
+            const { data, error } = await supabase
+                .from('sessions')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            // Convert to local format
+            const sessions = data.map(s => ({
+                id: s.id,
+                type: s.session_type,
+                note: s.note,
+                timestamp: s.created_at
+            }));
+
+            // Save to localStorage
+            localStorage.setItem(this.KEYS.SESSIONS, JSON.stringify(sessions));
+            return sessions;
+        } catch (error) {
+            console.error('Error loading sessions:', error);
+            return [];
+        }
+    },
+
+    // Sync settings to Supabase
+    async syncSettingsToSupabase(settings) {
+        if (!supabase || !currentUser) return;
+
+        try {
+            const { data: existing } = await supabase
+                .from('user_settings')
+                .select('id')
+                .eq('user_id', currentUser.id)
+                .single();
+
+            const settingsData = {
+                user_id: currentUser.id,
+                show_crisis_banner: settings.showCrisisBanner,
+                onboarding_complete: true,
+                updated_at: new Date().toISOString()
+            };
+
+            if (existing) {
+                const { error } = await supabase
+                    .from('user_settings')
+                    .update(settingsData)
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+            } else {
+                settingsData.created_at = new Date().toISOString();
+                const { error } = await supabase
+                    .from('user_settings')
+                    .insert([settingsData]);
+
+                if (error) throw error;
+            }
+
+            console.log('Settings synced to Supabase');
+        } catch (error) {
+            console.error('Error syncing settings:', error);
+        }
+    },
+
+    // Load settings from Supabase
+    async loadSettingsFromSupabase() {
+        if (!supabase || !currentUser) return null;
+
+        try {
+            const { data, error } = await supabase
+                .from('user_settings')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .single();
+
+            if (error) {
+                if (error.code === 'PGRST116') {
+                    return null;
+                }
+                throw error;
+            }
+
+            const settings = {
+                showCrisisBanner: data.show_crisis_banner,
+                onboardingComplete: data.onboarding_complete
+            };
+
+            localStorage.setItem(this.KEYS.SETTINGS, JSON.stringify(settings));
+            return settings;
+        } catch (error) {
+            console.error('Error loading settings:', error);
+            return null;
+        }
     }
 };
 
 // Initialize on load
 MAGIE_Storage.init();
 
+/* ===== Load User Data from Supabase ===== */
+
+async function loadUserDataFromSupabase() {
+    if (!supabase || !currentUser) return;
+
+    console.log('Loading user data from Supabase...');
+
+    // Load all user data
+    await Promise.all([
+        MAGIE_Storage.loadPrimerFromSupabase(),
+        MAGIE_Storage.loadSessionsFromSupabase(),
+        MAGIE_Storage.loadSettingsFromSupabase()
+    ]);
+
+    // Update user data
+    MAGIE_Storage.updateUserData({
+        onboardingComplete: true
+    });
+
+    console.log('User data loaded from Supabase');
+}
+
 </script>
     <script>
 /* ===== MAGIE Companion - Main Application ===== */
 
 // Initialize app on page load
-document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
+document.addEventListener('DOMContentLoaded', async function() {
+    await initializeApp();
 });
 
-function initializeApp() {
-    // Check if returning user
-    if (MAGIE_Storage.isOnboardingComplete() && MAGIE_Storage.hasPrimer()) {
-        showDashboard();
+async function initializeApp() {
+    // Initialize Supabase
+    const supabaseInitialized = initSupabase();
+
+    if (supabaseInitialized) {
+        // Set up auth listener
+        setupAuthListener();
+
+        // Check if user is already signed in
+        const user = await checkAuth();
+
+        if (user) {
+            // Load user data from Supabase
+            await loadUserDataFromSupabase();
+
+            // Check if they have a primer
+            if (MAGIE_Storage.hasPrimer()) {
+                showDashboard();
+            } else {
+                showView('view-landing');
+            }
+        } else {
+            // Not signed in, show landing page
+            showView('view-landing');
+        }
     } else {
-        showView('view-landing');
+        // Supabase not configured, use localStorage only
+        if (MAGIE_Storage.isOnboardingComplete() && MAGIE_Storage.hasPrimer()) {
+            showDashboard();
+        } else {
+            showView('view-landing');
+        }
     }
 
     // Set up event listeners
@@ -2012,7 +2654,36 @@ function nextStep(viewId) {
 }
 
 function startJourney() {
-    showView('view-welcome');
+    // If Supabase is configured and user not signed in, show auth modal
+    if (supabase && !currentUser) {
+        showAuthModal();
+        // Switch to sign up tab
+        const signupTab = document.querySelector('.auth-tab:nth-child(2)');
+        if (signupTab) signupTab.click();
+    } else {
+        showView('view-welcome');
+    }
+}
+
+function handleReturningUser() {
+    // If Supabase is configured, show sign in modal
+    if (supabase) {
+        if (currentUser) {
+            // Already signed in, go to dashboard
+            showDashboard();
+        } else {
+            // Show sign in modal
+            showAuthModal();
+        }
+    } else {
+        // No Supabase, use localStorage
+        if (MAGIE_Storage.hasPrimer()) {
+            showDashboard();
+        } else {
+            alert('No saved data found. Please start a new journey.');
+            showView('view-landing');
+        }
+    }
 }
 
 // ===== ASSESSMENT =====
@@ -2090,9 +2761,9 @@ function selectAI(aiName) {
 
 // ===== PRIMER WIZARD =====
 
-function nextPrimerSection(sectionName) {
+async function nextPrimerSection(sectionName) {
     // Save current section data first
-    saveCurrentPrimerSection();
+    await saveCurrentPrimerSection();
 
     // Hide all sections
     document.querySelectorAll('.primer-section').forEach(section => {
@@ -2121,7 +2792,7 @@ function prevPrimerSection(sectionName) {
     nextPrimerSection(sectionName); // Same function, just going backwards
 }
 
-function saveCurrentPrimerSection() {
+async function saveCurrentPrimerSection() {
     const activeSection = document.querySelector('.primer-section.active');
     if (!activeSection) return;
 
@@ -2151,7 +2822,12 @@ function saveCurrentPrimerSection() {
             break;
     }
 
-    MAGIE_Storage.savePrimer(updates);
+    const updatedPrimer = MAGIE_Storage.savePrimer(updates);
+
+    // Sync to Supabase if available
+    if (supabase && currentUser) {
+        await MAGIE_Storage.syncPrimerToSupabase(updatedPrimer);
+    }
 }
 
 function loadPrimerData() {
@@ -2188,9 +2864,18 @@ function loadPrimerData() {
     if (primer.goals) document.getElementById('primer-goals').value = primer.goals;
 }
 
-function completePrimer() {
+async function completePrimer() {
     // Save final section
     saveCurrentPrimerSection();
+
+    // Get the saved primer
+    const primer = MAGIE_Storage.getPrimer();
+
+    // Sync to Supabase if available
+    if (supabase && currentUser) {
+        await MAGIE_Storage.syncPrimerToSupabase(primer);
+        await MAGIE_Storage.syncSettingsToSupabase({ showCrisisBanner: true });
+    }
 
     // Generate and display primer
     const primerText = MAGIE_Storage.generatePrimerText();
@@ -2292,10 +2977,16 @@ function showDashboard() {
     document.getElementById('total-sessions').textContent = sessionCount;
     document.getElementById('days-practicing').textContent = daysPracticing;
 
+    // Show sign-out button if user is signed in
+    const signOutBtn = document.getElementById('sign-out-btn');
+    if (signOutBtn && supabase && currentUser) {
+        signOutBtn.style.display = 'inline-block';
+    }
+
     showView('view-dashboard');
 }
 
-function startSession() {
+async function startSession() {
     // Load primer data if editing
     loadPrimerData();
 
@@ -2307,10 +2998,15 @@ function startSession() {
         showView('view-first-session');
 
         // Log session start
-        MAGIE_Storage.addSession({
+        const session = MAGIE_Storage.addSession({
             type: 'session',
             note: 'Session started'
         });
+
+        // Sync to Supabase if available
+        if (supabase && currentUser) {
+            await MAGIE_Storage.syncSessionToSupabase(session);
+        }
     }
 }
 
