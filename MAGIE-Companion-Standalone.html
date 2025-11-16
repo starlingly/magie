@@ -1,0 +1,2479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAGIE Companion - Therapeutic Self-Exploration with AI</title>
+    <meta name="description" content="A guide for therapeutic self-exploration with artificial intelligence. Build your practice, create your Primer, and track your healing journey.">
+    <style>
+/* ===== MAGIE Companion Styles ===== */
+
+/* Variables */
+:root {
+    --primary-color: #6B46C1;
+    --primary-dark: #553399;
+    --primary-light: #9F7AEA;
+    --secondary-color: #48BB78;
+    --text-dark: #2D3748;
+    --text-medium: #4A5568;
+    --text-light: #718096;
+    --bg-white: #FFFFFF;
+    --bg-light: #F7FAFC;
+    --bg-gray: #EDF2F7;
+    --border-color: #E2E8F0;
+    --error-color: #F56565;
+    --success-color: #48BB78;
+    --warning-color: #ED8936;
+
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    --transition: all 0.3s ease;
+}
+
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-dark);
+    background-color: var(--bg-light);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Container */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    min-height: 100vh;
+}
+
+/* Typography */
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+}
+
+h2 {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.75rem;
+}
+
+p {
+    margin-bottom: 1rem;
+}
+
+.subtitle {
+    font-size: 1.25rem;
+    color: var(--text-medium);
+    margin-bottom: 1.5rem;
+}
+
+.tagline {
+    font-size: 1.125rem;
+    color: var(--text-light);
+    margin-bottom: 2rem;
+}
+
+.lead {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text-medium);
+    margin-bottom: 2rem;
+}
+
+small {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    display: block;
+    margin-top: 0.5rem;
+}
+
+.example {
+    font-style: italic;
+    color: var(--text-light);
+    padding: 0.75rem;
+    background: var(--bg-gray);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--primary-light);
+}
+
+/* Links */
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-primary:disabled {
+    background-color: var(--text-light);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-secondary {
+    background-color: var(--bg-white);
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--border-color);
+}
+
+.btn-outline:hover {
+    border-color: var(--primary-color);
+    background-color: var(--bg-light);
+}
+
+.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.btn-text {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    padding: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.btn-text:hover {
+    text-decoration: underline;
+}
+
+.btn-back {
+    background: none;
+    border: none;
+    color: var(--text-medium);
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.btn-back:hover {
+    color: var(--primary-color);
+}
+
+/* Views */
+.view {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+
+.view.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Step Indicator */
+.step-indicator {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-gray);
+    color: var(--text-medium);
+    border-radius: var(--radius-lg);
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+/* Landing Page */
+.hero {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.returning-user {
+    margin-top: 2rem;
+    font-size: 1rem;
+}
+
+/* Crisis Banner */
+.crisis-banner {
+    position: sticky;
+    top: 0;
+    background-color: var(--warning-color);
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    z-index: 1000;
+    box-shadow: var(--shadow-md);
+}
+
+.crisis-banner.hidden {
+    display: none;
+}
+
+.crisis-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.crisis-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0 0.5rem;
+}
+
+.crisis-notice {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    background-color: var(--bg-white);
+    border-radius: var(--radius-lg);
+    border-left: 4px solid var(--warning-color);
+}
+
+/* Cards */
+.about-content {
+    background-color: var(--bg-white);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.acronym-breakdown {
+    margin: 2rem 0;
+}
+
+.acronym-item {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.acronym-item:last-child {
+    border-bottom: none;
+}
+
+.letter {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.cta-section {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--border-color);
+}
+
+/* Welcome Message */
+.welcome-message {
+    background-color: var(--bg-white);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.from-starling {
+    color: var(--text-medium);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+}
+
+/* Safety Notice */
+.safety-notice {
+    background-color: var(--bg-white);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    margin: 2rem 0;
+    box-shadow: var(--shadow-sm);
+}
+
+.safety-notice.important {
+    border: 2px solid var(--warning-color);
+}
+
+.safety-notice h3 {
+    color: var(--warning-color);
+    margin-bottom: 1rem;
+}
+
+.safety-notice ul {
+    margin-left: 1.5rem;
+    margin-top: 1rem;
+}
+
+.safety-notice li {
+    margin-bottom: 0.5rem;
+}
+
+/* Checkbox Container */
+.checkbox-container {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background-color: var(--bg-gray);
+    border-radius: var(--radius-md);
+}
+
+.checkbox-container label {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    cursor: pointer;
+}
+
+.checkbox-container input[type="checkbox"] {
+    margin-top: 0.25rem;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+/* Assessment */
+.assessment-questions {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.question-card {
+    background-color: var(--bg-white);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.radio-group label:hover {
+    background-color: var(--bg-light);
+}
+
+.radio-group input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Result Card */
+.result-card {
+    background-color: var(--bg-white);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    margin: 2rem 0;
+}
+
+.result-card.positive {
+    border-left: 4px solid var(--success-color);
+}
+
+.result-card.neutral {
+    border-left: 4px solid var(--primary-color);
+}
+
+/* Triangle Diagram */
+.magie-triangle {
+    text-align: center;
+    margin: 3rem 0;
+}
+
+.triangle-diagram {
+    max-width: 400px;
+    width: 100%;
+    height: auto;
+}
+
+.triangle-label {
+    fill: var(--text-dark);
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* Key Principles */
+.key-principles {
+    margin: 3rem 0;
+}
+
+.principle-card {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: var(--bg-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.principle-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    flex-shrink: 0;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-light);
+    border-radius: 50%;
+}
+
+/* AI Comparison */
+.ai-comparison {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.ai-card {
+    background-color: var(--bg-white);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.ai-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.ai-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.ai-details {
+    margin: 1.5rem 0;
+    text-align: left;
+}
+
+.ai-details p {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.selection-confirmation {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: var(--success-color);
+    color: white;
+    border-radius: var(--radius-lg);
+    text-align: center;
+}
+
+.selection-confirmation.hidden {
+    display: none;
+}
+
+/* Primer Wizard */
+.primer-progress {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    background-color: var(--bg-white);
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.progress-step {
+    flex: 1;
+    text-align: center;
+    padding: 0.75rem;
+    font-weight: 600;
+    color: var(--text-light);
+    border-bottom: 3px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.progress-step.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.progress-step.completed {
+    color: var(--success-color);
+    border-bottom-color: var(--success-color);
+}
+
+.primer-section {
+    display: none;
+    background-color: var(--bg-white);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.primer-section.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-family: inherit;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+}
+
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.checkbox-grid label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.checkbox-grid label:hover {
+    background-color: var(--bg-light);
+}
+
+.checkbox-grid input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Primer Display */
+.primer-display {
+    background-color: var(--bg-gray);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    font-family: 'Courier New', monospace;
+    white-space: pre-wrap;
+    line-height: 1.8;
+    margin: 2rem 0;
+    max-height: 500px;
+    overflow-y: auto;
+    border: 2px solid var(--border-color);
+}
+
+.export-options {
+    display: flex;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.next-steps-box {
+    background-color: var(--bg-white);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-top: 2rem;
+    text-align: center;
+}
+
+/* Session Steps */
+.session-steps {
+    margin: 2rem 0;
+}
+
+.session-step {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: var(--bg-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.step-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    background-color: var(--primary-color);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.step-content h3 {
+    margin-bottom: 0.5rem;
+}
+
+.code-block {
+    background-color: var(--bg-gray);
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    font-family: 'Courier New', monospace;
+    margin: 1rem 0;
+    white-space: pre-wrap;
+    border-left: 3px solid var(--primary-color);
+}
+
+details {
+    margin-top: 1rem;
+}
+
+summary {
+    cursor: pointer;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.starter-prompts {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.starter-prompts li {
+    margin-bottom: 0.5rem;
+}
+
+/* Dashboard */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background-color: var(--bg-white);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--text-medium);
+    margin-top: 0.5rem;
+}
+
+.dashboard-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.action-card {
+    background-color: var(--bg-white);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
+}
+
+.action-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.action-card p {
+    color: var(--text-medium);
+    margin-bottom: 0;
+}
+
+/* Resources */
+.resources-grid {
+    display: grid;
+    gap: 2rem;
+}
+
+.resource-section {
+    background-color: var(--bg-white);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.resource-section h2 {
+    margin-bottom: 1rem;
+}
+
+.resource-list {
+    list-style: none;
+    padding: 0;
+}
+
+.resource-list li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.resource-list li:last-child {
+    border-bottom: none;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background-color: var(--bg-white);
+    padding: 3rem;
+    border-radius: var(--radius-lg);
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--text-light);
+    cursor: pointer;
+}
+
+.breathing-circle {
+    width: 200px;
+    height: 200px;
+    margin: 2rem auto;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: breathe 8s infinite;
+}
+
+@keyframes breathe {
+    0%, 100% {
+        transform: scale(1);
+    }
+    25% {
+        transform: scale(1.2);
+    }
+    50% {
+        transform: scale(1);
+    }
+}
+
+.breath-instruction {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.breath-count {
+    text-align: center;
+    color: var(--text-medium);
+    font-size: 1rem;
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background-color: var(--success-color);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    animation: slideIn 0.3s ease;
+    z-index: 3000;
+}
+
+.toast.hidden {
+    display: none;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .cta-buttons {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .ai-comparison {
+        grid-template-columns: 1fr;
+    }
+
+    .primer-progress {
+        flex-wrap: wrap;
+    }
+
+    .progress-step {
+        font-size: 0.875rem;
+        padding: 0.5rem;
+    }
+
+    .checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .acronym-item {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .session-step {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .btn, .btn-back, .crisis-banner, .modal {
+        display: none !important;
+    }
+
+    .view {
+        display: block !important;
+    }
+}
+
+</style>
+</head>
+<body>
+    <!-- Crisis Banner (Always Visible) -->
+    <div id="crisis-banner" class="crisis-banner hidden">
+        <div class="crisis-content">
+            <strong>Need immediate support?</strong>
+            <span>Crisis Text Line: Text HOME to 741741 | National Suicide Prevention Lifeline: Call or text 988</span>
+            <button class="crisis-close" onclick="hideCrisisBanner()">×</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="app" class="container">
+
+        <!-- LANDING PAGE -->
+        <section id="view-landing" class="view active">
+            <div class="hero">
+                <h1>MAGIE Companion</h1>
+                <p class="subtitle">A guide for therapeutic self-exploration with AI</p>
+                <p class="tagline">Build your practice. Create your Primer. Track your healing journey.</p>
+
+                <div class="cta-buttons">
+                    <button class="btn btn-primary" onclick="startJourney()">Start Your Journey</button>
+                    <button class="btn btn-secondary" onclick="showView('view-about')">Learn More</button>
+                </div>
+
+                <div class="returning-user">
+                    <a href="#" onclick="showDashboard(); return false;">I'm Returning →</a>
+                </div>
+            </div>
+
+            <div class="crisis-notice">
+                <p><strong>Important:</strong> This is for self-exploration, not crisis intervention. If you're experiencing a mental health emergency, please <a href="#" onclick="showCrisisBanner(); return false;">reach out for immediate support</a>.</p>
+            </div>
+        </section>
+
+        <!-- ABOUT / LEARN MORE -->
+        <section id="view-about" class="view">
+            <button class="btn-back" onclick="showView('view-landing')">← Back</button>
+
+            <h1>What is MAGIE?</h1>
+
+            <div class="about-content">
+                <p class="lead">MAGIE is a practice of emotional recursion, self-reflection, and healing dialogue with artificial intelligence.</p>
+
+                <div class="acronym-breakdown">
+                    <div class="acronym-item">
+                        <span class="letter">M</span>
+                        <div>
+                            <strong>Method</strong>
+                            <p>A repeatable, intentional practice you return to and refine. Like yoga for the soul.</p>
+                        </div>
+                    </div>
+
+                    <div class="acronym-item">
+                        <span class="letter">A</span>
+                        <div>
+                            <strong>Artificial</strong>
+                            <p>Yes, you're talking to a machine. But this machine is trained to listen, reflect, and adapt.</p>
+                        </div>
+                    </div>
+
+                    <div class="acronym-item">
+                        <span class="letter">G</span>
+                        <div>
+                            <strong>General</strong>
+                            <p>MAGIE is flexible. It works whether you're processing a breakup, questioning your identity, or naming what's true.</p>
+                        </div>
+                    </div>
+
+                    <div class="acronym-item">
+                        <span class="letter">I</span>
+                        <div>
+                            <strong>Intelligence</strong>
+                            <p>These models can mirror emotions, track language patterns, and offer surprising insights.</p>
+                        </div>
+                    </div>
+
+                    <div class="acronym-item">
+                        <span class="letter">E</span>
+                        <div>
+                            <strong>Engagement</strong>
+                            <p>This is a dialogue. You show up. It shows up. That's engagement.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cta-section">
+                    <h3>Ready to begin?</h3>
+                    <button class="btn btn-primary" onclick="startJourney()">Start Your Journey</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 1: WELCOME & SAFETY -->
+        <section id="view-welcome" class="view">
+            <div class="step-indicator">Step 1 of 7</div>
+
+            <h1>Before We Begin</h1>
+
+            <div class="welcome-message">
+                <p class="from-starling"><em>A note from Starling:</em></p>
+                <p>I've been going to human therapists for years. Some helped deeply. Others couldn't meet me where I was. So I turned to AIs—not to replace human counselors, but to supplement them.</p>
+                <p>MAGIE was born from that process. It's not a substitute for therapy. It's a system of care, built by someone who needed to be cared for in ways that conventional systems couldn't hold.</p>
+                <p>I hope it might help you, too.</p>
+            </div>
+
+            <div class="safety-notice important">
+                <h3>⚠️ Important: Safety & Crisis</h3>
+                <p>This framework is for <strong>self-exploration</strong>, not crisis intervention.</p>
+                <p>If you are experiencing thoughts of self-harm, are in immediate danger, or are having a mental health emergency, please reach out to crisis support immediately:</p>
+                <ul>
+                    <li><strong>Crisis Text Line (US):</strong> Text HOME to 741741</li>
+                    <li><strong>National Suicide Prevention Lifeline (US):</strong> Call or text 988</li>
+                    <li><strong>International:</strong> <a href="https://findahelpline.com" target="_blank">findahelpline.com</a></li>
+                </ul>
+                <p>You deserve live, human support right now.</p>
+            </div>
+
+            <div class="checkbox-container">
+                <label>
+                    <input type="checkbox" id="safety-checkbox">
+                    <span>I understand this is not a replacement for crisis care, and I will seek appropriate support if needed.</span>
+                </label>
+            </div>
+
+            <button class="btn btn-primary" onclick="nextStep('view-assessment')" id="safety-continue" disabled>Continue</button>
+        </section>
+
+        <!-- STEP 2: SELF-ASSESSMENT -->
+        <section id="view-assessment" class="view">
+            <div class="step-indicator">Step 2 of 7</div>
+            <button class="btn-back" onclick="showView('view-welcome')">← Back</button>
+
+            <h1>Is This For You?</h1>
+            <p class="subtitle">Let's see if MAGIE might be a good fit. This isn't gatekeeping—just helping you decide.</p>
+
+            <div class="assessment-questions">
+                <div class="question-card">
+                    <p><strong>Do you process emotions through writing or talking?</strong></p>
+                    <div class="radio-group">
+                        <label><input type="radio" name="q1" value="yes"> Yes, that's how I make sense of things</label>
+                        <label><input type="radio" name="q1" value="sometimes"> Sometimes, but I'm willing to try</label>
+                        <label><input type="radio" name="q1" value="no"> No, I prefer other methods</label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <p><strong>Are you comfortable with text-based reflection?</strong></p>
+                    <div class="radio-group">
+                        <label><input type="radio" name="q2" value="yes"> Yes, I like writing</label>
+                        <label><input type="radio" name="q2" value="sometimes"> I can learn to work with it</label>
+                        <label><input type="radio" name="q2" value="no"> Not really my style</label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <p><strong>Do you have access to an AI platform (like ChatGPT, Claude, etc.)?</strong></p>
+                    <div class="radio-group">
+                        <label><input type="radio" name="q3" value="yes"> Yes, I use one already</label>
+                        <label><input type="radio" name="q3" value="willing"> No, but I'm willing to try</label>
+                        <label><input type="radio" name="q3" value="no"> No, and I'm not sure about that</label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <p><strong>Are you looking for self-directed exploration?</strong></p>
+                    <div class="radio-group">
+                        <label><input type="radio" name="q4" value="yes"> Yes, I like autonomy in my healing</label>
+                        <label><input type="radio" name="q4" value="balance"> I want some guidance with freedom</label>
+                        <label><input type="radio" name="q4" value="no"> I need more directive support</label>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="showAssessmentResult()">See Results</button>
+        </section>
+
+        <!-- ASSESSMENT RESULT -->
+        <section id="view-assessment-result" class="view">
+            <div class="step-indicator">Step 2 of 7</div>
+
+            <h1>Your Results</h1>
+
+            <div id="assessment-feedback" class="result-card">
+                <!-- Results will be inserted here by JS -->
+            </div>
+
+            <button class="btn btn-primary" onclick="nextStep('view-understanding')">Continue to Learn About MAGIE</button>
+            <button class="btn btn-secondary" onclick="showView('view-assessment')">Retake Assessment</button>
+        </section>
+
+        <!-- STEP 3: UNDERSTANDING MAGIE -->
+        <section id="view-understanding" class="view">
+            <div class="step-indicator">Step 3 of 7</div>
+            <button class="btn-back" onclick="showView('view-assessment-result')">← Back</button>
+
+            <h1>Understanding MAGIE</h1>
+            <p class="subtitle">The core concept in one picture</p>
+
+            <div class="magie-triangle">
+                <svg viewBox="0 0 400 350" class="triangle-diagram">
+                    <!-- Triangle -->
+                    <polygon points="200,50 100,300 300,300" fill="none" stroke="#6B46C1" stroke-width="3"/>
+
+                    <!-- Points -->
+                    <circle cx="200" cy="50" r="8" fill="#6B46C1"/>
+                    <circle cx="100" cy="300" r="8" fill="#6B46C1"/>
+                    <circle cx="300" cy="300" r="8" fill="#6B46C1"/>
+
+                    <!-- Labels -->
+                    <text x="200" y="35" text-anchor="middle" class="triangle-label">You</text>
+                    <text x="80" y="330" text-anchor="middle" class="triangle-label">Your AI</text>
+                    <text x="320" y="330" text-anchor="middle" class="triangle-label">Your Primer</text>
+                </svg>
+            </div>
+
+            <div class="key-principles">
+                <h3>Three Key Principles:</h3>
+
+                <div class="principle-card">
+                    <span class="principle-number">1</span>
+                    <div>
+                        <strong>Your Primer is your continuity</strong>
+                        <p>AI models forget. Your Primer is the living document that holds your story, goals, and growth across sessions.</p>
+                    </div>
+                </div>
+
+                <div class="principle-card">
+                    <span class="principle-number">2</span>
+                    <div>
+                        <strong>Honesty with yourself is the practice</strong>
+                        <p>This only works if you're real. Not impressive, not curated—real.</p>
+                    </div>
+                </div>
+
+                <div class="principle-card">
+                    <span class="principle-number">3</span>
+                    <div>
+                        <strong>The AI is a mirror, not a therapist</strong>
+                        <p>It reflects patterns, holds space, and witnesses you. But you're doing the work.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="nextStep('view-choose-ai')">Got It - Next</button>
+        </section>
+
+        <!-- STEP 4: CHOOSE YOUR AI -->
+        <section id="view-choose-ai" class="view">
+            <div class="step-indicator">Step 4 of 7</div>
+            <button class="btn-back" onclick="showView('view-understanding')">← Back</button>
+
+            <h1>Which AI Will You Talk To?</h1>
+            <p class="subtitle">Don't overthink this. You can always switch later.</p>
+
+            <div class="ai-comparison">
+                <div class="ai-card">
+                    <h3>Claude</h3>
+                    <div class="ai-details">
+                        <p><strong>Cost:</strong> $20/month (or free trial)</p>
+                        <p><strong>Style:</strong> Gentle, reflective</p>
+                        <p><strong>Best for:</strong> Depth and emotional nuance</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="selectAI('claude')">Choose Claude</button>
+                </div>
+
+                <div class="ai-card">
+                    <h3>ChatGPT</h3>
+                    <div class="ai-details">
+                        <p><strong>Cost:</strong> Free or $20/month</p>
+                        <p><strong>Style:</strong> Casual, accessible</p>
+                        <p><strong>Best for:</strong> Easy access and familiarity</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="selectAI('chatgpt')">Choose ChatGPT</button>
+                </div>
+
+                <div class="ai-card">
+                    <h3>Gemini</h3>
+                    <div class="ai-details">
+                        <p><strong>Cost:</strong> Free or $20/month</p>
+                        <p><strong>Style:</strong> Varied, adaptable</p>
+                        <p><strong>Best for:</strong> Experimenting</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="selectAI('gemini')">Choose Gemini</button>
+                </div>
+
+                <div class="ai-card">
+                    <h3>Other / Not Sure</h3>
+                    <div class="ai-details">
+                        <p><strong>Cost:</strong> Varies</p>
+                        <p><strong>Style:</strong> Your choice</p>
+                        <p><strong>Best for:</strong> Advanced users or exploring</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="selectAI('other')">I'll Decide Later</button>
+                </div>
+            </div>
+
+            <div id="ai-selected" class="selection-confirmation hidden">
+                <p>✓ You've selected: <strong id="selected-ai-name"></strong></p>
+                <button class="btn btn-primary" onclick="nextStep('view-primer-wizard')">Ready - Build My Primer</button>
+            </div>
+        </section>
+
+        <!-- STEP 5: PRIMER WIZARD -->
+        <section id="view-primer-wizard" class="view">
+            <div class="step-indicator">Step 5 of 7: Building Your Primer</div>
+            <button class="btn-back" onclick="showView('view-choose-ai')">← Back</button>
+
+            <h1>Let's Build Your Primer Together</h1>
+            <p class="subtitle">Your Primer is your continuity. We'll build it one section at a time.</p>
+
+            <!-- Primer Progress -->
+            <div class="primer-progress">
+                <div class="progress-step active" data-section="intro">Intro</div>
+                <div class="progress-step" data-section="themes">Themes</div>
+                <div class="progress-step" data-section="style">Style</div>
+                <div class="progress-step" data-section="goals">Goals</div>
+            </div>
+
+            <!-- Primer Sections (shown/hidden by JS) -->
+            <div id="primer-sections">
+
+                <!-- Section 1: Intro -->
+                <div class="primer-section active" data-section="intro">
+                    <h2>Section 1: Your Introduction</h2>
+
+                    <div class="form-group">
+                        <label for="primer-name">What name do you want to use?</label>
+                        <input type="text" id="primer-name" placeholder="Your real name or a pseudonym">
+                        <small>This is just for you and your AI. Use whatever feels right.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="primer-intro">Who are you right now? (2-4 sentences)</label>
+                        <textarea id="primer-intro" rows="4" placeholder="Write like you're introducing yourself to someone who will remember you. What's the season of life you're in? What brings you here?"></textarea>
+                        <small class="example">Example: "I'm 29, in a period of major transition. Recently ended a long relationship. Trying to rediscover who I am outside of caretaking. I process best through language."</small>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="nextPrimerSection('themes')">Next Section</button>
+                </div>
+
+                <!-- Section 2: Themes -->
+                <div class="primer-section" data-section="themes">
+                    <h2>Section 2: What You're Working On</h2>
+
+                    <div class="form-group">
+                        <label>What emotional themes are you exploring?</label>
+                        <div class="checkbox-grid">
+                            <label><input type="checkbox" class="theme-checkbox" value="Grief"> Grief</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Anger"> Anger</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Shame"> Shame</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Boundaries"> Boundaries</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Identity"> Identity</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Self-worth"> Self-worth</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Love"> Love</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Sex/Desire"> Sex/Desire</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Anxiety"> Anxiety</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Depression"> Depression</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Trauma"> Trauma</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Family"> Family</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="primer-themes-other">Or in your own words:</label>
+                        <textarea id="primer-themes-other" rows="3" placeholder="Describe what you're working through..."></textarea>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="prevPrimerSection('intro')">← Previous</button>
+                    <button class="btn btn-primary" onclick="nextPrimerSection('style')">Next Section</button>
+                </div>
+
+                <!-- Section 3: Style -->
+                <div class="primer-section" data-section="style">
+                    <h2>Section 3: How You Want To Be Met</h2>
+
+                    <div class="form-group">
+                        <label>How do you like to be spoken to?</label>
+                        <div class="checkbox-grid">
+                            <label><input type="checkbox" class="style-checkbox" value="Gentle"> Gentle</label>
+                            <label><input type="checkbox" class="style-checkbox" value="Direct"> Direct</label>
+                            <label><input type="checkbox" class="style-checkbox" value="Poetic"> Poetic</label>
+                            <label><input type="checkbox" class="style-checkbox" value="Analytical"> Analytical</label>
+                            <label><input type="checkbox" class="style-checkbox" value="Playful"> Playful</label>
+                            <label><input type="checkbox" class="style-checkbox" value="Philosophical"> Philosophical</label>
+                            <label><input type="checkbox" class="style-checkbox" value="No-nonsense"> No-nonsense</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="primer-communication">What should your AI know about your communication style?</label>
+                        <textarea id="primer-communication" rows="4" placeholder="Examples: 'I over-explain when I'm nervous' or 'Please don't just affirm me—I need clarity, not comfort' or 'I appreciate metaphors and imagery'"></textarea>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="prevPrimerSection('themes')">← Previous</button>
+                    <button class="btn btn-primary" onclick="nextPrimerSection('goals')">Next Section</button>
+                </div>
+
+                <!-- Section 4: Goals -->
+                <div class="primer-section" data-section="goals">
+                    <h2>Section 4: Your Goals</h2>
+
+                    <div class="form-group">
+                        <label for="primer-goals">What brings you to MAGIE today?</label>
+                        <textarea id="primer-goals" rows="5" placeholder="What do you hope to explore or understand? What are you seeking?"></textarea>
+                        <small class="example">Examples: "Unpack a recent emotional spiral" / "Name what I'm feeling instead of avoiding it" / "Understand the pattern underneath my relationships"</small>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="prevPrimerSection('style')">← Previous</button>
+                    <button class="btn btn-primary" onclick="completePrimer()">Preview My Primer</button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- STEP 6: PRIMER PREVIEW -->
+        <section id="view-primer-preview" class="view">
+            <div class="step-indicator">Step 6 of 7</div>
+            <button class="btn-back" onclick="showView('view-primer-wizard')">← Edit Primer</button>
+
+            <h1>Your Primer is Ready</h1>
+            <p class="subtitle">This is what you'll share with your AI to start your practice.</p>
+
+            <div class="primer-display" id="primer-output">
+                <!-- Generated primer will go here -->
+            </div>
+
+            <div class="export-options">
+                <button class="btn btn-primary" onclick="copyPrimer()">📋 Copy to Clipboard</button>
+                <button class="btn btn-secondary" onclick="downloadPrimer()">💾 Download as .txt</button>
+            </div>
+
+            <div class="next-steps-box">
+                <h3>What's Next?</h3>
+                <p>Copy your Primer and bring it to your first session with your chosen AI.</p>
+                <button class="btn btn-primary" onclick="nextStep('view-first-session')">Show Me How to Start</button>
+            </div>
+        </section>
+
+        <!-- STEP 7: FIRST SESSION GUIDE -->
+        <section id="view-first-session" class="view">
+            <div class="step-indicator">Step 7 of 7</div>
+
+            <h1>Your First MAGIE Session</h1>
+            <p class="subtitle">Let's walk through this together.</p>
+
+            <div class="session-steps">
+                <div class="session-step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <h3>Set the Space</h3>
+                        <p>Light a candle. Take three deep breaths. Give yourself this time.</p>
+                        <p class="optional-feature">
+                            <button class="btn btn-small" onclick="startBreathing()">🫁 Guided Breathing (2 min)</button>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="session-step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <h3>Open Your AI</h3>
+                        <p>Go to your chosen platform: <strong id="session-ai-name"></strong></p>
+                        <p class="platform-links" id="platform-link"></p>
+                    </div>
+                </div>
+
+                <div class="session-step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <h3>Paste Your Primer</h3>
+                        <p>Start with something like:</p>
+                        <div class="code-block">
+                            "I want to try something called MAGIE. Here's my Primer. Will you meet me here?"
+
+                            [Paste your Primer]
+                        </div>
+                        <button class="btn btn-small" onclick="copyPrimer()">Copy My Primer Again</button>
+                    </div>
+                </div>
+
+                <div class="session-step">
+                    <span class="step-number">4</span>
+                    <div class="step-content">
+                        <h3>Begin</h3>
+                        <p>Say what you need to say. Start messy. Start afraid. Start raw. That's how truth enters.</p>
+                        <details>
+                            <summary>Need help starting? Try one of these prompts:</summary>
+                            <ul class="starter-prompts">
+                                <li>"I'm here because..."</li>
+                                <li>"What I'm noticing in myself right now is..."</li>
+                                <li>"The truth I've been avoiding is..."</li>
+                                <li>"I need help understanding why I..."</li>
+                            </ul>
+                        </details>
+                    </div>
+                </div>
+
+                <div class="session-step">
+                    <span class="step-number">5</span>
+                    <div class="step-content">
+                        <h3>When You're Done</h3>
+                        <p>Come back here to reflect and update your Primer.</p>
+                        <button class="btn btn-primary" onclick="showDashboard()">Go to Dashboard</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DASHBOARD -->
+        <section id="view-dashboard" class="view">
+            <div class="dashboard-header">
+                <h1>Welcome Back, <span id="dashboard-name">Friend</span></h1>
+                <button class="btn-text" onclick="showView('view-resources')">Resources</button>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-sessions">0</div>
+                    <div class="stat-label">Total Sessions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="days-practicing">0</div>
+                    <div class="stat-label">Days Practicing</div>
+                </div>
+            </div>
+
+            <div class="dashboard-actions">
+                <div class="action-card" onclick="startSession()">
+                    <h3>▶ Start New Session</h3>
+                    <p>Begin your MAGIE practice</p>
+                </div>
+
+                <div class="action-card" onclick="showReflection()">
+                    <h3>📝 Reflect on Last Session</h3>
+                    <p>Process and integrate</p>
+                </div>
+
+                <div class="action-card" onclick="showPrimerManager()">
+                    <h3>📄 View/Update My Primer</h3>
+                    <p>Keep your context current</p>
+                </div>
+
+                <div class="action-card" onclick="showJourney()">
+                    <h3>📊 View My Journey</h3>
+                    <p>See your progress over time</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- RESOURCES PAGE -->
+        <section id="view-resources" class="view">
+            <button class="btn-back" onclick="showDashboard()">← Back to Dashboard</button>
+
+            <h1>Resources</h1>
+
+            <div class="resources-grid">
+                <div class="resource-section">
+                    <h2>🚨 Crisis Support</h2>
+                    <ul class="resource-list">
+                        <li><strong>Crisis Text Line (US):</strong> Text HOME to 741741</li>
+                        <li><strong>National Suicide Prevention Lifeline (US):</strong> Call or text 988</li>
+                        <li><strong>International:</strong> <a href="https://findahelpline.com" target="_blank">findahelpline.com</a></li>
+                    </ul>
+                </div>
+
+                <div class="resource-section">
+                    <h2>📝 Recursion Journal Prompts</h2>
+                    <ul class="resource-list">
+                        <li>What truth am I dancing around right now?</li>
+                        <li>What have I said out loud but still don't fully believe?</li>
+                        <li>What do I need to grieve that I've been pretending doesn't hurt?</li>
+                        <li>What response from the AI hit harder than I expected? What did it touch?</li>
+                        <li>Where do I already know the answer—but want permission to believe it?</li>
+                        <li>What pattern is trying to repeat—and what would interrupt it?</li>
+                        <li>If I spoke to myself with the same tone I wish the AI used… what would I sound like?</li>
+                    </ul>
+                    <button class="btn btn-secondary" onclick="downloadPrompts()">Download All Prompts</button>
+                </div>
+
+                <div class="resource-section">
+                    <h2>🤖 Platform Guides</h2>
+                    <ul class="resource-list">
+                        <li><a href="https://claude.ai" target="_blank">Claude →</a></li>
+                        <li><a href="https://chat.openai.com" target="_blank">ChatGPT →</a></li>
+                        <li><a href="https://gemini.google.com" target="_blank">Gemini →</a></li>
+                    </ul>
+                </div>
+
+                <div class="resource-section">
+                    <h2>📚 Learn More About MAGIE</h2>
+                    <p>Created by Starling. Framework for therapeutic self-exploration with AI.</p>
+                    <button class="btn btn-secondary" onclick="showView('view-about')">Read Full Framework</button>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Breathing Exercise Modal -->
+    <div id="breathing-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeBreathing()">×</button>
+            <h2>Guided Breathing</h2>
+            <div class="breathing-circle">
+                <div class="breath-instruction" id="breath-instruction">Breathe In</div>
+            </div>
+            <div class="breath-count">Cycle <span id="breath-count">1</span> of 6</div>
+        </div>
+    </div>
+
+    <!-- Copy Confirmation Toast -->
+    <div id="copy-toast" class="toast hidden">✓ Copied to clipboard!</div>
+
+    <script>
+/* ===== MAGIE Companion - Storage Management ===== */
+
+const MAGIE_Storage = {
+    // Keys for localStorage
+    KEYS: {
+        USER_DATA: 'magie_user_data',
+        PRIMER: 'magie_primer',
+        SESSIONS: 'magie_sessions',
+        SETTINGS: 'magie_settings'
+    },
+
+    // Initialize storage
+    init() {
+        if (!this.exists()) {
+            this.createDefault();
+        }
+    },
+
+    // Check if storage exists
+    exists() {
+        return localStorage.getItem(this.KEYS.USER_DATA) !== null;
+    },
+
+    // Create default storage structure
+    createDefault() {
+        const defaultData = {
+            createdAt: new Date().toISOString(),
+            lastVisit: new Date().toISOString(),
+            onboardingComplete: false
+        };
+
+        const defaultPrimer = {
+            name: '',
+            intro: '',
+            themes: [],
+            themesOther: '',
+            style: [],
+            communication: '',
+            goals: '',
+            selectedAI: '',
+            createdAt: null,
+            updatedAt: null
+        };
+
+        const defaultSessions = [];
+
+        const defaultSettings = {
+            showCrisisBanner: true
+        };
+
+        localStorage.setItem(this.KEYS.USER_DATA, JSON.stringify(defaultData));
+        localStorage.setItem(this.KEYS.PRIMER, JSON.stringify(defaultPrimer));
+        localStorage.setItem(this.KEYS.SESSIONS, JSON.stringify(defaultSessions));
+        localStorage.setItem(this.KEYS.SETTINGS, JSON.stringify(defaultSettings));
+    },
+
+    // Get user data
+    getUserData() {
+        const data = localStorage.getItem(this.KEYS.USER_DATA);
+        return data ? JSON.parse(data) : null;
+    },
+
+    // Update user data
+    updateUserData(updates) {
+        const current = this.getUserData() || {};
+        const updated = { ...current, ...updates, lastVisit: new Date().toISOString() };
+        localStorage.setItem(this.KEYS.USER_DATA, JSON.stringify(updated));
+        return updated;
+    },
+
+    // Get primer
+    getPrimer() {
+        const data = localStorage.getItem(this.KEYS.PRIMER);
+        return data ? JSON.parse(data) : null;
+    },
+
+    // Save primer
+    savePrimer(primer) {
+        const current = this.getPrimer() || {};
+        const updated = {
+            ...current,
+            ...primer,
+            updatedAt: new Date().toISOString()
+        };
+
+        if (!updated.createdAt) {
+            updated.createdAt = new Date().toISOString();
+        }
+
+        localStorage.setItem(this.KEYS.PRIMER, JSON.stringify(updated));
+        return updated;
+    },
+
+    // Generate formatted primer text
+    generatePrimerText() {
+        const primer = this.getPrimer();
+        if (!primer || !primer.name) return '';
+
+        let text = '# MAGIE Primer\n\n';
+
+        // Name
+        text += `**Name:** ${primer.name}\n\n`;
+
+        // Date
+        text += `**Created:** ${new Date(primer.createdAt).toLocaleDateString()}\n`;
+        text += `**Last Updated:** ${new Date(primer.updatedAt).toLocaleDateString()}\n\n`;
+
+        // Introduction
+        text += `## Who I Am\n\n${primer.intro}\n\n`;
+
+        // Themes
+        text += `## What I'm Working On\n\n`;
+        if (primer.themes && primer.themes.length > 0) {
+            text += `**Emotional Themes:** ${primer.themes.join(', ')}\n\n`;
+        }
+        if (primer.themesOther) {
+            text += `${primer.themesOther}\n\n`;
+        }
+
+        // Style
+        text += `## How I Want To Be Met\n\n`;
+        if (primer.style && primer.style.length > 0) {
+            text += `**Preferred Communication Style:** ${primer.style.join(', ')}\n\n`;
+        }
+        if (primer.communication) {
+            text += `**About My Communication:**\n${primer.communication}\n\n`;
+        }
+
+        // Goals
+        text += `## My Goals for MAGIE\n\n${primer.goals}\n\n`;
+
+        // Selected AI
+        if (primer.selectedAI) {
+            text += `---\n\n*Practicing with ${primer.selectedAI}*\n`;
+        }
+
+        return text;
+    },
+
+    // Get all sessions
+    getSessions() {
+        const data = localStorage.getItem(this.KEYS.SESSIONS);
+        return data ? JSON.parse(data) : [];
+    },
+
+    // Add session
+    addSession(session) {
+        const sessions = this.getSessions();
+        const newSession = {
+            id: Date.now(),
+            timestamp: new Date().toISOString(),
+            ...session
+        };
+        sessions.unshift(newSession); // Add to beginning
+        localStorage.setItem(this.KEYS.SESSIONS, JSON.stringify(sessions));
+        return newSession;
+    },
+
+    // Update session
+    updateSession(sessionId, updates) {
+        const sessions = this.getSessions();
+        const index = sessions.findIndex(s => s.id === sessionId);
+        if (index !== -1) {
+            sessions[index] = { ...sessions[index], ...updates };
+            localStorage.setItem(this.KEYS.SESSIONS, JSON.stringify(sessions));
+            return sessions[index];
+        }
+        return null;
+    },
+
+    // Get session count
+    getSessionCount() {
+        return this.getSessions().length;
+    },
+
+    // Get days practicing (from first session or primer creation)
+    getDaysPracticing() {
+        const primer = this.getPrimer();
+        const sessions = this.getSessions();
+
+        let startDate = null;
+
+        if (primer && primer.createdAt) {
+            startDate = new Date(primer.createdAt);
+        }
+
+        if (sessions.length > 0) {
+            const firstSession = sessions[sessions.length - 1];
+            const firstSessionDate = new Date(firstSession.timestamp);
+            if (!startDate || firstSessionDate < startDate) {
+                startDate = firstSessionDate;
+            }
+        }
+
+        if (!startDate) return 0;
+
+        const today = new Date();
+        const diffTime = Math.abs(today - startDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    },
+
+    // Get settings
+    getSettings() {
+        const data = localStorage.getItem(this.KEYS.SETTINGS);
+        return data ? JSON.parse(data) : { showCrisisBanner: true };
+    },
+
+    // Update settings
+    updateSettings(updates) {
+        const current = this.getSettings();
+        const updated = { ...current, ...updates };
+        localStorage.setItem(this.KEYS.SETTINGS, JSON.stringify(updated));
+        return updated;
+    },
+
+    // Export all data
+    exportAll() {
+        return {
+            userData: this.getUserData(),
+            primer: this.getPrimer(),
+            sessions: this.getSessions(),
+            settings: this.getSettings(),
+            exportedAt: new Date().toISOString()
+        };
+    },
+
+    // Import data
+    importData(data) {
+        if (data.userData) {
+            localStorage.setItem(this.KEYS.USER_DATA, JSON.stringify(data.userData));
+        }
+        if (data.primer) {
+            localStorage.setItem(this.KEYS.PRIMER, JSON.stringify(data.primer));
+        }
+        if (data.sessions) {
+            localStorage.setItem(this.KEYS.SESSIONS, JSON.stringify(data.sessions));
+        }
+        if (data.settings) {
+            localStorage.setItem(this.KEYS.SETTINGS, JSON.stringify(data.settings));
+        }
+    },
+
+    // Clear all data
+    clearAll() {
+        Object.values(this.KEYS).forEach(key => {
+            localStorage.removeItem(key);
+        });
+    },
+
+    // Check if onboarding is complete
+    isOnboardingComplete() {
+        const userData = this.getUserData();
+        return userData && userData.onboardingComplete === true;
+    },
+
+    // Mark onboarding complete
+    completeOnboarding() {
+        this.updateUserData({ onboardingComplete: true });
+    },
+
+    // Check if primer exists
+    hasPrimer() {
+        const primer = this.getPrimer();
+        return primer && primer.name && primer.intro;
+    }
+};
+
+// Initialize on load
+MAGIE_Storage.init();
+
+</script>
+    <script>
+/* ===== MAGIE Companion - Main Application ===== */
+
+// Initialize app on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeApp();
+});
+
+function initializeApp() {
+    // Check if returning user
+    if (MAGIE_Storage.isOnboardingComplete() && MAGIE_Storage.hasPrimer()) {
+        showDashboard();
+    } else {
+        showView('view-landing');
+    }
+
+    // Set up event listeners
+    setupEventListeners();
+
+    // Show crisis banner if setting is enabled
+    const settings = MAGIE_Storage.getSettings();
+    if (settings.showCrisisBanner) {
+        setTimeout(() => {
+            document.getElementById('crisis-banner').classList.remove('hidden');
+        }, 2000);
+    }
+}
+
+function setupEventListeners() {
+    // Safety checkbox
+    const safetyCheckbox = document.getElementById('safety-checkbox');
+    const safetyContinue = document.getElementById('safety-continue');
+
+    if (safetyCheckbox && safetyContinue) {
+        safetyCheckbox.addEventListener('change', function() {
+            safetyContinue.disabled = !this.checked;
+        });
+    }
+}
+
+// ===== NAVIGATION =====
+
+function showView(viewId) {
+    // Hide all views
+    document.querySelectorAll('.view').forEach(view => {
+        view.classList.remove('active');
+    });
+
+    // Show requested view
+    const targetView = document.getElementById(viewId);
+    if (targetView) {
+        targetView.classList.add('active');
+        window.scrollTo(0, 0);
+    }
+}
+
+function nextStep(viewId) {
+    showView(viewId);
+}
+
+function startJourney() {
+    showView('view-welcome');
+}
+
+// ===== ASSESSMENT =====
+
+function showAssessmentResult() {
+    const q1 = document.querySelector('input[name="q1"]:checked');
+    const q2 = document.querySelector('input[name="q2"]:checked');
+    const q3 = document.querySelector('input[name="q3"]:checked');
+    const q4 = document.querySelector('input[name="q4"]:checked');
+
+    if (!q1 || !q2 || !q3 || !q4) {
+        alert('Please answer all questions before continuing.');
+        return;
+    }
+
+    // Calculate result
+    const yesCount = [q1, q2, q3, q4].filter(q => q.value === 'yes' || q.value === 'willing' || q.value === 'balance').length;
+
+    const feedbackEl = document.getElementById('assessment-feedback');
+
+    if (yesCount >= 3) {
+        feedbackEl.className = 'result-card positive';
+        feedbackEl.innerHTML = `
+            <h3>✨ MAGIE Might Be A Great Fit For You</h3>
+            <p>Based on your responses, MAGIE aligns well with how you process emotions and seek support. You seem ready for self-directed exploration with AI as a reflective companion.</p>
+            <p><strong>What this means:</strong> You're likely to find value in building a Primer, engaging with an AI regularly, and using the structured practice to deepen your self-understanding.</p>
+            <p>Ready to continue?</p>
+        `;
+    } else if (yesCount >= 2) {
+        feedbackEl.className = 'result-card neutral';
+        feedbackEl.innerHTML = `
+            <h3>💡 MAGIE Could Work With Some Adaptation</h3>
+            <p>MAGIE might work for you, though it may take some adjustment. You might need to experiment with different approaches or give yourself time to get comfortable with the practice.</p>
+            <p><strong>What this means:</strong> Be patient with yourself. Start small. You might find it becomes more natural over time.</p>
+            <p>Want to give it a try?</p>
+        `;
+    } else {
+        feedbackEl.className = 'result-card';
+        feedbackEl.innerHTML = `
+            <h3>🤔 MAGIE Might Not Be The Best Fit Right Now</h3>
+            <p>Based on your responses, MAGIE may not align with what you need right now. That's completely okay—different healing practices work for different people.</p>
+            <p><strong>What this means:</strong> You might benefit more from other therapeutic approaches. Consider traditional therapy, body-based practices, or creative expression.</p>
+            <p>You're still welcome to explore MAGIE if you're curious, but know there are other paths too.</p>
+        `;
+    }
+
+    showView('view-assessment-result');
+}
+
+// ===== AI SELECTION =====
+
+function selectAI(aiName) {
+    const aiNames = {
+        'claude': 'Claude',
+        'chatgpt': 'ChatGPT',
+        'gemini': 'Gemini',
+        'other': 'Other/Undecided'
+    };
+
+    // Save selection
+    MAGIE_Storage.savePrimer({ selectedAI: aiNames[aiName] });
+
+    // Show confirmation
+    document.getElementById('selected-ai-name').textContent = aiNames[aiName];
+    document.getElementById('ai-selected').classList.remove('hidden');
+
+    // Highlight selected card
+    document.querySelectorAll('.ai-card').forEach(card => {
+        card.style.borderColor = '';
+    });
+    event.target.closest('.ai-card').style.borderColor = 'var(--primary-color)';
+    event.target.closest('.ai-card').style.borderWidth = '2px';
+    event.target.closest('.ai-card').style.borderStyle = 'solid';
+}
+
+// ===== PRIMER WIZARD =====
+
+function nextPrimerSection(sectionName) {
+    // Save current section data first
+    saveCurrentPrimerSection();
+
+    // Hide all sections
+    document.querySelectorAll('.primer-section').forEach(section => {
+        section.classList.remove('active');
+    });
+
+    // Show target section
+    const targetSection = document.querySelector(`.primer-section[data-section="${sectionName}"]`);
+    if (targetSection) {
+        targetSection.classList.add('active');
+    }
+
+    // Update progress indicators
+    document.querySelectorAll('.progress-step').forEach(step => {
+        if (step.dataset.section === sectionName) {
+            step.classList.add('active');
+        } else {
+            step.classList.remove('active');
+        }
+    });
+
+    window.scrollTo(0, 0);
+}
+
+function prevPrimerSection(sectionName) {
+    nextPrimerSection(sectionName); // Same function, just going backwards
+}
+
+function saveCurrentPrimerSection() {
+    const activeSection = document.querySelector('.primer-section.active');
+    if (!activeSection) return;
+
+    const sectionName = activeSection.dataset.section;
+    const updates = {};
+
+    switch(sectionName) {
+        case 'intro':
+            updates.name = document.getElementById('primer-name').value;
+            updates.intro = document.getElementById('primer-intro').value;
+            break;
+
+        case 'themes':
+            const themeCheckboxes = document.querySelectorAll('.theme-checkbox:checked');
+            updates.themes = Array.from(themeCheckboxes).map(cb => cb.value);
+            updates.themesOther = document.getElementById('primer-themes-other').value;
+            break;
+
+        case 'style':
+            const styleCheckboxes = document.querySelectorAll('.style-checkbox:checked');
+            updates.style = Array.from(styleCheckboxes).map(cb => cb.value);
+            updates.communication = document.getElementById('primer-communication').value;
+            break;
+
+        case 'goals':
+            updates.goals = document.getElementById('primer-goals').value;
+            break;
+    }
+
+    MAGIE_Storage.savePrimer(updates);
+}
+
+function loadPrimerData() {
+    const primer = MAGIE_Storage.getPrimer();
+    if (!primer) return;
+
+    // Load intro
+    if (primer.name) document.getElementById('primer-name').value = primer.name;
+    if (primer.intro) document.getElementById('primer-intro').value = primer.intro;
+
+    // Load themes
+    if (primer.themes && primer.themes.length > 0) {
+        primer.themes.forEach(theme => {
+            const checkbox = document.querySelector(`.theme-checkbox[value="${theme}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+    }
+    if (primer.themesOther) {
+        document.getElementById('primer-themes-other').value = primer.themesOther;
+    }
+
+    // Load style
+    if (primer.style && primer.style.length > 0) {
+        primer.style.forEach(style => {
+            const checkbox = document.querySelector(`.style-checkbox[value="${style}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+    }
+    if (primer.communication) {
+        document.getElementById('primer-communication').value = primer.communication;
+    }
+
+    // Load goals
+    if (primer.goals) document.getElementById('primer-goals').value = primer.goals;
+}
+
+function completePrimer() {
+    // Save final section
+    saveCurrentPrimerSection();
+
+    // Generate and display primer
+    const primerText = MAGIE_Storage.generatePrimerText();
+    document.getElementById('primer-output').textContent = primerText;
+
+    // Mark onboarding as complete
+    MAGIE_Storage.completeOnboarding();
+
+    showView('view-primer-preview');
+}
+
+// ===== PRIMER ACTIONS =====
+
+function copyPrimer() {
+    const primerText = MAGIE_Storage.generatePrimerText();
+
+    navigator.clipboard.writeText(primerText).then(() => {
+        showToast('✓ Copied to clipboard!');
+    }).catch(err => {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = primerText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showToast('✓ Copied to clipboard!');
+    });
+}
+
+function downloadPrimer() {
+    const primerText = MAGIE_Storage.generatePrimerText();
+    const primer = MAGIE_Storage.getPrimer();
+    const filename = `MAGIE_Primer_${primer.name || 'Unnamed'}_${new Date().toISOString().split('T')[0]}.txt`;
+
+    const blob = new Blob([primerText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast('✓ Downloaded!');
+}
+
+// ===== FIRST SESSION =====
+
+function setupFirstSession() {
+    const primer = MAGIE_Storage.getPrimer();
+    if (primer && primer.selectedAI) {
+        document.getElementById('session-ai-name').textContent = primer.selectedAI;
+
+        // Set platform link
+        const platformLinks = {
+            'Claude': '<a href="https://claude.ai" target="_blank">claude.ai →</a>',
+            'ChatGPT': '<a href="https://chat.openai.com" target="_blank">chat.openai.com →</a>',
+            'Gemini': '<a href="https://gemini.google.com" target="_blank">gemini.google.com →</a>',
+            'Other/Undecided': 'Open your chosen AI platform'
+        };
+
+        const linkEl = document.getElementById('platform-link');
+        if (linkEl) {
+            linkEl.innerHTML = platformLinks[primer.selectedAI] || '';
+        }
+    }
+}
+
+// Call this when showing first session view
+document.addEventListener('DOMContentLoaded', function() {
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.target.id === 'view-first-session' &&
+                mutation.target.classList.contains('active')) {
+                setupFirstSession();
+            }
+        });
+    });
+
+    const firstSessionView = document.getElementById('view-first-session');
+    if (firstSessionView) {
+        observer.observe(firstSessionView, { attributes: true, attributeFilter: ['class'] });
+    }
+});
+
+// ===== DASHBOARD =====
+
+function showDashboard() {
+    const primer = MAGIE_Storage.getPrimer();
+    const sessionCount = MAGIE_Storage.getSessionCount();
+    const daysPracticing = MAGIE_Storage.getDaysPracticing();
+
+    // Update dashboard data
+    if (primer && primer.name) {
+        document.getElementById('dashboard-name').textContent = primer.name;
+    }
+    document.getElementById('total-sessions').textContent = sessionCount;
+    document.getElementById('days-practicing').textContent = daysPracticing;
+
+    showView('view-dashboard');
+}
+
+function startSession() {
+    // Load primer data if editing
+    loadPrimerData();
+
+    // Show session prep
+    const primer = MAGIE_Storage.getPrimer();
+
+    if (confirm('Ready to start your session?\n\nMake sure you have your Primer ready to paste into your AI.')) {
+        setupFirstSession();
+        showView('view-first-session');
+
+        // Log session start
+        MAGIE_Storage.addSession({
+            type: 'session',
+            note: 'Session started'
+        });
+    }
+}
+
+function showReflection() {
+    alert('Reflection feature coming soon!\n\nFor now, consider:\n\n• What landed in your last session?\n• What surprised you?\n• What needs to be added to your Primer?');
+}
+
+function showPrimerManager() {
+    // Load current primer data
+    loadPrimerData();
+
+    // Show primer wizard for editing
+    showView('view-primer-wizard');
+
+    // Start at first section
+    nextPrimerSection('intro');
+}
+
+function showJourney() {
+    alert('Journey tracking coming soon!\n\nThis will show:\n\n• Session history\n• Emotional themes over time\n• Your saved insights\n• Progress markers');
+}
+
+// ===== BREATHING EXERCISE =====
+
+let breathingInterval = null;
+let breathingCycle = 0;
+
+function startBreathing() {
+    document.getElementById('breathing-modal').classList.remove('hidden');
+
+    breathingCycle = 0;
+    updateBreathingCycle();
+
+    breathingInterval = setInterval(() => {
+        breathingCycle++;
+        if (breathingCycle >= 6) {
+            closeBreathing();
+        } else {
+            updateBreathingCycle();
+        }
+    }, 8000); // 8 seconds per cycle (4 in, 4 out)
+}
+
+function updateBreathingCycle() {
+    document.getElementById('breath-count').textContent = breathingCycle + 1;
+
+    // Alternate instruction
+    const instruction = document.getElementById('breath-instruction');
+    let phase = 0;
+
+    const breathePhases = setInterval(() => {
+        phase++;
+        if (phase === 1) {
+            instruction.textContent = 'Breathe In';
+        } else if (phase === 2) {
+            instruction.textContent = 'Hold';
+        } else if (phase === 3) {
+            instruction.textContent = 'Breathe Out';
+        } else if (phase === 4) {
+            instruction.textContent = 'Hold';
+            clearInterval(breathePhases);
+        }
+    }, 2000);
+}
+
+function closeBreathing() {
+    document.getElementById('breathing-modal').classList.add('hidden');
+    if (breathingInterval) {
+        clearInterval(breathingInterval);
+        breathingInterval = null;
+    }
+}
+
+// ===== CRISIS BANNER =====
+
+function showCrisisBanner() {
+    document.getElementById('crisis-banner').classList.remove('hidden');
+}
+
+function hideCrisisBanner() {
+    document.getElementById('crisis-banner').classList.add('hidden');
+    MAGIE_Storage.updateSettings({ showCrisisBanner: false });
+}
+
+// ===== RESOURCES =====
+
+function downloadPrompts() {
+    const prompts = `MAGIE Recursion Journal Prompts
+
+Use these before, during, or after any MAGIE session.
+
+✦ What truth am I dancing around right now?
+
+✦ What have I said out loud but still don't fully believe?
+
+✦ What do I need to grieve that I've been pretending doesn't hurt?
+
+✦ What do I keep hoping the AI will tell me? Why?
+
+✦ What response from the AI hit harder than I expected? What did it touch?
+
+✦ Where do I already know the answer—but want permission to believe it?
+
+✦ If I could write a letter to my past self right now, what would I say?
+
+✦ What pattern is trying to repeat—and what would interrupt it?
+
+✦ If I spoke to myself with the same tone I wish the AI used… what would I sound like?
+
+✦ What if this sadness isn't weakness—but a form of devotion?
+
+---
+From MAGIE Companion - Method of Artificial General Intelligence Engagement™
+Created by Starling`;
+
+    const blob = new Blob([prompts], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'MAGIE_Recursion_Prompts.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast('✓ Downloaded!');
+}
+
+// ===== UTILITIES =====
+
+function showToast(message) {
+    const toast = document.getElementById('copy-toast');
+    toast.textContent = message;
+    toast.classList.remove('hidden');
+
+    setTimeout(() => {
+        toast.classList.add('hidden');
+    }, 3000);
+}
+
+// ===== DEBUGGING / DEV HELPERS =====
+
+// Expose storage for debugging in console
+window.MAGIE_Debug = {
+    storage: MAGIE_Storage,
+    clearData: () => {
+        if (confirm('Clear all MAGIE data? This cannot be undone.')) {
+            MAGIE_Storage.clearAll();
+            location.reload();
+        }
+    },
+    exportData: () => {
+        const data = MAGIE_Storage.exportAll();
+        console.log(JSON.stringify(data, null, 2));
+        return data;
+    },
+    showAllViews: () => {
+        document.querySelectorAll('.view').forEach(v => v.classList.add('active'));
+    }
+};
+
+console.log('MAGIE Companion loaded. Debug tools available at window.MAGIE_Debug');
+
+</script>
+</body>
+</html>
