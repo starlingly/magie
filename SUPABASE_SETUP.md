@@ -154,19 +154,19 @@ CREATE TRIGGER update_user_settings_updated_at
 2. Make sure **Email** is enabled (it should be by default)
 3. Scroll down to **Email Templates** if you want to customize signup/reset emails (optional)
 
-## Step 6: Add Your API Keys to the Website
+## Step 6: Add Your API Keys to GitHub Secrets
 
-Now you'll update your `index.html` file with your Supabase credentials.
+**IMPORTANT**: Don't put your keys directly in the code! Instead, add them as GitHub Secrets:
 
-Look for this section in your code (I'll add it near the top):
+1. Go to your GitHub repository
+2. Click **Settings** → **Secrets and variables** → **Actions**
+3. Click **"New repository secret"**
+4. Add `SUPABASE_URL` with your Project URL from Step 3
+5. Add `SUPABASE_ANON_KEY` with your anon key from Step 3
 
-```javascript
-// Supabase Configuration
-const SUPABASE_URL = 'YOUR_PROJECT_URL_HERE';
-const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
-```
+The GitHub Actions workflow will automatically inject these into your site when it deploys.
 
-Replace `YOUR_PROJECT_URL_HERE` and `YOUR_ANON_KEY_HERE` with the values from Step 3.
+See **GETTING_STARTED.md** for detailed step-by-step instructions.
 
 ## Step 7: Test It Out
 
@@ -178,10 +178,10 @@ Replace `YOUR_PROJECT_URL_HERE` and `YOUR_ANON_KEY_HERE` with the values from St
 
 ## Security Notes
 
-- **Never commit your Supabase keys to a public Git repository** if you have sensitive data
-- The `anon` key is safe for client-side use - it's protected by Row Level Security (RLS)
-- RLS ensures users can only access their own data
+- Your Supabase keys are stored as GitHub Secrets and automatically injected during deployment
+- The `anon` key is protected by Row Level Security (RLS) - users can only access their own data
 - All connections use HTTPS encryption
+- User data is isolated and private
 
 ## Troubleshooting
 
