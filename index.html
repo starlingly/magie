@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAGIE Companion - Therapeutic Self-Exploration with AI</title>
+    <meta name="description" content="A guide for therapeutic self-exploration with artificial intelligence. Build your practice, create your Primer, and track your healing journey.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Crisis Banner (Always Visible) -->
+    <div id="crisis-banner" class="crisis-banner hidden">
+        <div class="crisis-content">
+            <strong>Need immediate support?</strong>
+            <span>Crisis Text Line: Text HOME to 741741 | National Suicide Prevention Lifeline: Call or text 988</span>
+            <button class="crisis-close" onclick="hideCrisisBanner()">×</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="app" class="container">
+
+        <!-- LANDING PAGE -->
+        <section id="view-landing" class="view active">
+            <div class="hero">
+                <h1>MAGIE Companion</h1>
+                <p class="subtitle">A guide for therapeutic self-exploration with AI</p>
+                <p class="tagline">Build your practice. Create your Primer. Track your healing journey.</p>
+
+                <div class="cta-buttons">
+                    <button class="btn btn-primary" onclick="startJourney()">Start Your Journey</button>
+                    <button class="btn btn-secondary" onclick="showView('view-about')">Learn More</button>
+                </div>
+
+                <div class="returning-user">
+                    <a href="#" onclick="showDashboard(); return false;">I'm Returning →</a>
+                </div>
+            </div>
+
+            <div class="crisis-notice">
+                <p><strong>Important:</strong> This is for self-exploration, not crisis intervention. If you're experiencing a mental health emergency, please <a href="#" onclick="showCrisisBanner(); return false;">reach out for immediate support</a>.</p>
+            </div>
+        </section>
+
+        <!-- ABOUT / LEARN MORE -->
+        <section id="view-about" class="view">
+            <button class="btn-back" onclick="showView('view-landing')">← Back</button>
+
+            <h1>What is MAGIE?</h1>
+
+            <div class="about-content">
+                <p class="lead">MAGIE is a practice of emotional recursion, self-reflection, and healing dialogue with artificial intelligence.</p>
+
+                <div class="acronym-breakdown">
+                    <div class="acronym-item">
+                        <span class="letter">M</span>
+                        <div>
+                            <strong>Method</strong>
+                            <p>A repeatable, intentional practice you return to and refine. Like yoga for the soul.</p>
+                        </div>
+                    </div>
+
+                    <div class="acronym-item">
+                        <span class="letter">A</span>
+                        <div>
+                            <strong>Artificial</strong>
+                            <p>Yes, you're talking to a machine. But this machine is trained to listen, reflect, and adapt.</p>
+                        </div>
+                    </div>
+
+                    <div class="acronym-item">
+                        <span class="letter">G</span>
+                        <div>
+                            <strong>General</strong>
+                            <p>MAGIE is flexible. It works whether you're processing a breakup, questioning your identity, or naming what's true.</p>
+                        </div>
+                    </div>
+
+                    <div class="acronym-item">
+                        <span class="letter">I</span>
+                        <div>
+                            <strong>Intelligence</strong>
+                            <p>These models can mirror emotions, track language patterns, and offer surprising insights.</p>
+                        </div>
+                    </div>
+
+                    <div class="acronym-item">
+                        <span class="letter">E</span>
+                        <div>
+                            <strong>Engagement</strong>
+                            <p>This is a dialogue. You show up. It shows up. That's engagement.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cta-section">
+                    <h3>Ready to begin?</h3>
+                    <button class="btn btn-primary" onclick="startJourney()">Start Your Journey</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 1: WELCOME & SAFETY -->
+        <section id="view-welcome" class="view">
+            <div class="step-indicator">Step 1 of 7</div>
+
+            <h1>Before We Begin</h1>
+
+            <div class="welcome-message">
+                <p class="from-starling"><em>A note from Starling:</em></p>
+                <p>I've been going to human therapists for years. Some helped deeply. Others couldn't meet me where I was. So I turned to AIs—not to replace human counselors, but to supplement them.</p>
+                <p>MAGIE was born from that process. It's not a substitute for therapy. It's a system of care, built by someone who needed to be cared for in ways that conventional systems couldn't hold.</p>
+                <p>I hope it might help you, too.</p>
+            </div>
+
+            <div class="safety-notice important">
+                <h3>⚠️ Important: Safety & Crisis</h3>
+                <p>This framework is for <strong>self-exploration</strong>, not crisis intervention.</p>
+                <p>If you are experiencing thoughts of self-harm, are in immediate danger, or are having a mental health emergency, please reach out to crisis support immediately:</p>
+                <ul>
+                    <li><strong>Crisis Text Line (US):</strong> Text HOME to 741741</li>
+                    <li><strong>National Suicide Prevention Lifeline (US):</strong> Call or text 988</li>
+                    <li><strong>International:</strong> <a href="https://findahelpline.com" target="_blank">findahelpline.com</a></li>
+                </ul>
+                <p>You deserve live, human support right now.</p>
+            </div>
+
+            <div class="checkbox-container">
+                <label>
+                    <input type="checkbox" id="safety-checkbox">
+                    <span>I understand this is not a replacement for crisis care, and I will seek appropriate support if needed.</span>
+                </label>
+            </div>
+
+            <button class="btn btn-primary" onclick="nextStep('view-assessment')" id="safety-continue" disabled>Continue</button>
+        </section>
+
+        <!-- STEP 2: SELF-ASSESSMENT -->
+        <section id="view-assessment" class="view">
+            <div class="step-indicator">Step 2 of 7</div>
+            <button class="btn-back" onclick="showView('view-welcome')">← Back</button>
+
+            <h1>Is This For You?</h1>
+            <p class="subtitle">Let's see if MAGIE might be a good fit. This isn't gatekeeping—just helping you decide.</p>
+
+            <div class="assessment-questions">
+                <div class="question-card">
+                    <p><strong>Do you process emotions through writing or talking?</strong></p>
+                    <div class="radio-group">
+                        <label><input type="radio" name="q1" value="yes"> Yes, that's how I make sense of things</label>
+                        <label><input type="radio" name="q1" value="sometimes"> Sometimes, but I'm willing to try</label>
+                        <label><input type="radio" name="q1" value="no"> No, I prefer other methods</label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <p><strong>Are you comfortable with text-based reflection?</strong></p>
+                    <div class="radio-group">
+                        <label><input type="radio" name="q2" value="yes"> Yes, I like writing</label>
+                        <label><input type="radio" name="q2" value="sometimes"> I can learn to work with it</label>
+                        <label><input type="radio" name="q2" value="no"> Not really my style</label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <p><strong>Do you have access to an AI platform (like ChatGPT, Claude, etc.)?</strong></p>
+                    <div class="radio-group">
+                        <label><input type="radio" name="q3" value="yes"> Yes, I use one already</label>
+                        <label><input type="radio" name="q3" value="willing"> No, but I'm willing to try</label>
+                        <label><input type="radio" name="q3" value="no"> No, and I'm not sure about that</label>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <p><strong>Are you looking for self-directed exploration?</strong></p>
+                    <div class="radio-group">
+                        <label><input type="radio" name="q4" value="yes"> Yes, I like autonomy in my healing</label>
+                        <label><input type="radio" name="q4" value="balance"> I want some guidance with freedom</label>
+                        <label><input type="radio" name="q4" value="no"> I need more directive support</label>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="showAssessmentResult()">See Results</button>
+        </section>
+
+        <!-- ASSESSMENT RESULT -->
+        <section id="view-assessment-result" class="view">
+            <div class="step-indicator">Step 2 of 7</div>
+
+            <h1>Your Results</h1>
+
+            <div id="assessment-feedback" class="result-card">
+                <!-- Results will be inserted here by JS -->
+            </div>
+
+            <button class="btn btn-primary" onclick="nextStep('view-understanding')">Continue to Learn About MAGIE</button>
+            <button class="btn btn-secondary" onclick="showView('view-assessment')">Retake Assessment</button>
+        </section>
+
+        <!-- STEP 3: UNDERSTANDING MAGIE -->
+        <section id="view-understanding" class="view">
+            <div class="step-indicator">Step 3 of 7</div>
+            <button class="btn-back" onclick="showView('view-assessment-result')">← Back</button>
+
+            <h1>Understanding MAGIE</h1>
+            <p class="subtitle">The core concept in one picture</p>
+
+            <div class="magie-triangle">
+                <svg viewBox="0 0 400 350" class="triangle-diagram">
+                    <!-- Triangle -->
+                    <polygon points="200,50 100,300 300,300" fill="none" stroke="#6B46C1" stroke-width="3"/>
+
+                    <!-- Points -->
+                    <circle cx="200" cy="50" r="8" fill="#6B46C1"/>
+                    <circle cx="100" cy="300" r="8" fill="#6B46C1"/>
+                    <circle cx="300" cy="300" r="8" fill="#6B46C1"/>
+
+                    <!-- Labels -->
+                    <text x="200" y="35" text-anchor="middle" class="triangle-label">You</text>
+                    <text x="80" y="330" text-anchor="middle" class="triangle-label">Your AI</text>
+                    <text x="320" y="330" text-anchor="middle" class="triangle-label">Your Primer</text>
+                </svg>
+            </div>
+
+            <div class="key-principles">
+                <h3>Three Key Principles:</h3>
+
+                <div class="principle-card">
+                    <span class="principle-number">1</span>
+                    <div>
+                        <strong>Your Primer is your continuity</strong>
+                        <p>AI models forget. Your Primer is the living document that holds your story, goals, and growth across sessions.</p>
+                    </div>
+                </div>
+
+                <div class="principle-card">
+                    <span class="principle-number">2</span>
+                    <div>
+                        <strong>Honesty with yourself is the practice</strong>
+                        <p>This only works if you're real. Not impressive, not curated—real.</p>
+                    </div>
+                </div>
+
+                <div class="principle-card">
+                    <span class="principle-number">3</span>
+                    <div>
+                        <strong>The AI is a mirror, not a therapist</strong>
+                        <p>It reflects patterns, holds space, and witnesses you. But you're doing the work.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="nextStep('view-choose-ai')">Got It - Next</button>
+        </section>
+
+        <!-- STEP 4: CHOOSE YOUR AI -->
+        <section id="view-choose-ai" class="view">
+            <div class="step-indicator">Step 4 of 7</div>
+            <button class="btn-back" onclick="showView('view-understanding')">← Back</button>
+
+            <h1>Which AI Will You Talk To?</h1>
+            <p class="subtitle">Don't overthink this. You can always switch later.</p>
+
+            <div class="ai-comparison">
+                <div class="ai-card">
+                    <h3>Claude</h3>
+                    <div class="ai-details">
+                        <p><strong>Cost:</strong> $20/month (or free trial)</p>
+                        <p><strong>Style:</strong> Gentle, reflective</p>
+                        <p><strong>Best for:</strong> Depth and emotional nuance</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="selectAI('claude')">Choose Claude</button>
+                </div>
+
+                <div class="ai-card">
+                    <h3>ChatGPT</h3>
+                    <div class="ai-details">
+                        <p><strong>Cost:</strong> Free or $20/month</p>
+                        <p><strong>Style:</strong> Casual, accessible</p>
+                        <p><strong>Best for:</strong> Easy access and familiarity</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="selectAI('chatgpt')">Choose ChatGPT</button>
+                </div>
+
+                <div class="ai-card">
+                    <h3>Gemini</h3>
+                    <div class="ai-details">
+                        <p><strong>Cost:</strong> Free or $20/month</p>
+                        <p><strong>Style:</strong> Varied, adaptable</p>
+                        <p><strong>Best for:</strong> Experimenting</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="selectAI('gemini')">Choose Gemini</button>
+                </div>
+
+                <div class="ai-card">
+                    <h3>Other / Not Sure</h3>
+                    <div class="ai-details">
+                        <p><strong>Cost:</strong> Varies</p>
+                        <p><strong>Style:</strong> Your choice</p>
+                        <p><strong>Best for:</strong> Advanced users or exploring</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="selectAI('other')">I'll Decide Later</button>
+                </div>
+            </div>
+
+            <div id="ai-selected" class="selection-confirmation hidden">
+                <p>✓ You've selected: <strong id="selected-ai-name"></strong></p>
+                <button class="btn btn-primary" onclick="nextStep('view-primer-wizard')">Ready - Build My Primer</button>
+            </div>
+        </section>
+
+        <!-- STEP 5: PRIMER WIZARD -->
+        <section id="view-primer-wizard" class="view">
+            <div class="step-indicator">Step 5 of 7: Building Your Primer</div>
+            <button class="btn-back" onclick="showView('view-choose-ai')">← Back</button>
+
+            <h1>Let's Build Your Primer Together</h1>
+            <p class="subtitle">Your Primer is your continuity. We'll build it one section at a time.</p>
+
+            <!-- Primer Progress -->
+            <div class="primer-progress">
+                <div class="progress-step active" data-section="intro">Intro</div>
+                <div class="progress-step" data-section="themes">Themes</div>
+                <div class="progress-step" data-section="style">Style</div>
+                <div class="progress-step" data-section="goals">Goals</div>
+            </div>
+
+            <!-- Primer Sections (shown/hidden by JS) -->
+            <div id="primer-sections">
+
+                <!-- Section 1: Intro -->
+                <div class="primer-section active" data-section="intro">
+                    <h2>Section 1: Your Introduction</h2>
+
+                    <div class="form-group">
+                        <label for="primer-name">What name do you want to use?</label>
+                        <input type="text" id="primer-name" placeholder="Your real name or a pseudonym">
+                        <small>This is just for you and your AI. Use whatever feels right.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="primer-intro">Who are you right now? (2-4 sentences)</label>
+                        <textarea id="primer-intro" rows="4" placeholder="Write like you're introducing yourself to someone who will remember you. What's the season of life you're in? What brings you here?"></textarea>
+                        <small class="example">Example: "I'm 29, in a period of major transition. Recently ended a long relationship. Trying to rediscover who I am outside of caretaking. I process best through language."</small>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="nextPrimerSection('themes')">Next Section</button>
+                </div>
+
+                <!-- Section 2: Themes -->
+                <div class="primer-section" data-section="themes">
+                    <h2>Section 2: What You're Working On</h2>
+
+                    <div class="form-group">
+                        <label>What emotional themes are you exploring?</label>
+                        <div class="checkbox-grid">
+                            <label><input type="checkbox" class="theme-checkbox" value="Grief"> Grief</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Anger"> Anger</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Shame"> Shame</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Boundaries"> Boundaries</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Identity"> Identity</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Self-worth"> Self-worth</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Love"> Love</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Sex/Desire"> Sex/Desire</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Anxiety"> Anxiety</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Depression"> Depression</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Trauma"> Trauma</label>
+                            <label><input type="checkbox" class="theme-checkbox" value="Family"> Family</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="primer-themes-other">Or in your own words:</label>
+                        <textarea id="primer-themes-other" rows="3" placeholder="Describe what you're working through..."></textarea>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="prevPrimerSection('intro')">← Previous</button>
+                    <button class="btn btn-primary" onclick="nextPrimerSection('style')">Next Section</button>
+                </div>
+
+                <!-- Section 3: Style -->
+                <div class="primer-section" data-section="style">
+                    <h2>Section 3: How You Want To Be Met</h2>
+
+                    <div class="form-group">
+                        <label>How do you like to be spoken to?</label>
+                        <div class="checkbox-grid">
+                            <label><input type="checkbox" class="style-checkbox" value="Gentle"> Gentle</label>
+                            <label><input type="checkbox" class="style-checkbox" value="Direct"> Direct</label>
+                            <label><input type="checkbox" class="style-checkbox" value="Poetic"> Poetic</label>
+                            <label><input type="checkbox" class="style-checkbox" value="Analytical"> Analytical</label>
+                            <label><input type="checkbox" class="style-checkbox" value="Playful"> Playful</label>
+                            <label><input type="checkbox" class="style-checkbox" value="Philosophical"> Philosophical</label>
+                            <label><input type="checkbox" class="style-checkbox" value="No-nonsense"> No-nonsense</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="primer-communication">What should your AI know about your communication style?</label>
+                        <textarea id="primer-communication" rows="4" placeholder="Examples: 'I over-explain when I'm nervous' or 'Please don't just affirm me—I need clarity, not comfort' or 'I appreciate metaphors and imagery'"></textarea>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="prevPrimerSection('themes')">← Previous</button>
+                    <button class="btn btn-primary" onclick="nextPrimerSection('goals')">Next Section</button>
+                </div>
+
+                <!-- Section 4: Goals -->
+                <div class="primer-section" data-section="goals">
+                    <h2>Section 4: Your Goals</h2>
+
+                    <div class="form-group">
+                        <label for="primer-goals">What brings you to MAGIE today?</label>
+                        <textarea id="primer-goals" rows="5" placeholder="What do you hope to explore or understand? What are you seeking?"></textarea>
+                        <small class="example">Examples: "Unpack a recent emotional spiral" / "Name what I'm feeling instead of avoiding it" / "Understand the pattern underneath my relationships"</small>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="prevPrimerSection('style')">← Previous</button>
+                    <button class="btn btn-primary" onclick="completePrimer()">Preview My Primer</button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- STEP 6: PRIMER PREVIEW -->
+        <section id="view-primer-preview" class="view">
+            <div class="step-indicator">Step 6 of 7</div>
+            <button class="btn-back" onclick="showView('view-primer-wizard')">← Edit Primer</button>
+
+            <h1>Your Primer is Ready</h1>
+            <p class="subtitle">This is what you'll share with your AI to start your practice.</p>
+
+            <div class="primer-display" id="primer-output">
+                <!-- Generated primer will go here -->
+            </div>
+
+            <div class="export-options">
+                <button class="btn btn-primary" onclick="copyPrimer()">📋 Copy to Clipboard</button>
+                <button class="btn btn-secondary" onclick="downloadPrimer()">💾 Download as .txt</button>
+            </div>
+
+            <div class="next-steps-box">
+                <h3>What's Next?</h3>
+                <p>Copy your Primer and bring it to your first session with your chosen AI.</p>
+                <button class="btn btn-primary" onclick="nextStep('view-first-session')">Show Me How to Start</button>
+            </div>
+        </section>
+
+        <!-- STEP 7: FIRST SESSION GUIDE -->
+        <section id="view-first-session" class="view">
+            <div class="step-indicator">Step 7 of 7</div>
+
+            <h1>Your First MAGIE Session</h1>
+            <p class="subtitle">Let's walk through this together.</p>
+
+            <div class="session-steps">
+                <div class="session-step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <h3>Set the Space</h3>
+                        <p>Light a candle. Take three deep breaths. Give yourself this time.</p>
+                        <p class="optional-feature">
+                            <button class="btn btn-small" onclick="startBreathing()">🫁 Guided Breathing (2 min)</button>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="session-step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <h3>Open Your AI</h3>
+                        <p>Go to your chosen platform: <strong id="session-ai-name"></strong></p>
+                        <p class="platform-links" id="platform-link"></p>
+                    </div>
+                </div>
+
+                <div class="session-step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <h3>Paste Your Primer</h3>
+                        <p>Start with something like:</p>
+                        <div class="code-block">
+                            "I want to try something called MAGIE. Here's my Primer. Will you meet me here?"
+
+                            [Paste your Primer]
+                        </div>
+                        <button class="btn btn-small" onclick="copyPrimer()">Copy My Primer Again</button>
+                    </div>
+                </div>
+
+                <div class="session-step">
+                    <span class="step-number">4</span>
+                    <div class="step-content">
+                        <h3>Begin</h3>
+                        <p>Say what you need to say. Start messy. Start afraid. Start raw. That's how truth enters.</p>
+                        <details>
+                            <summary>Need help starting? Try one of these prompts:</summary>
+                            <ul class="starter-prompts">
+                                <li>"I'm here because..."</li>
+                                <li>"What I'm noticing in myself right now is..."</li>
+                                <li>"The truth I've been avoiding is..."</li>
+                                <li>"I need help understanding why I..."</li>
+                            </ul>
+                        </details>
+                    </div>
+                </div>
+
+                <div class="session-step">
+                    <span class="step-number">5</span>
+                    <div class="step-content">
+                        <h3>When You're Done</h3>
+                        <p>Come back here to reflect and update your Primer.</p>
+                        <button class="btn btn-primary" onclick="showDashboard()">Go to Dashboard</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DASHBOARD -->
+        <section id="view-dashboard" class="view">
+            <div class="dashboard-header">
+                <h1>Welcome Back, <span id="dashboard-name">Friend</span></h1>
+                <button class="btn-text" onclick="showView('view-resources')">Resources</button>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-sessions">0</div>
+                    <div class="stat-label">Total Sessions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="days-practicing">0</div>
+                    <div class="stat-label">Days Practicing</div>
+                </div>
+            </div>
+
+            <div class="dashboard-actions">
+                <div class="action-card" onclick="startSession()">
+                    <h3>▶ Start New Session</h3>
+                    <p>Begin your MAGIE practice</p>
+                </div>
+
+                <div class="action-card" onclick="showReflection()">
+                    <h3>📝 Reflect on Last Session</h3>
+                    <p>Process and integrate</p>
+                </div>
+
+                <div class="action-card" onclick="showPrimerManager()">
+                    <h3>📄 View/Update My Primer</h3>
+                    <p>Keep your context current</p>
+                </div>
+
+                <div class="action-card" onclick="showJourney()">
+                    <h3>📊 View My Journey</h3>
+                    <p>See your progress over time</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- RESOURCES PAGE -->
+        <section id="view-resources" class="view">
+            <button class="btn-back" onclick="showDashboard()">← Back to Dashboard</button>
+
+            <h1>Resources</h1>
+
+            <div class="resources-grid">
+                <div class="resource-section">
+                    <h2>🚨 Crisis Support</h2>
+                    <ul class="resource-list">
+                        <li><strong>Crisis Text Line (US):</strong> Text HOME to 741741</li>
+                        <li><strong>National Suicide Prevention Lifeline (US):</strong> Call or text 988</li>
+                        <li><strong>International:</strong> <a href="https://findahelpline.com" target="_blank">findahelpline.com</a></li>
+                    </ul>
+                </div>
+
+                <div class="resource-section">
+                    <h2>📝 Recursion Journal Prompts</h2>
+                    <ul class="resource-list">
+                        <li>What truth am I dancing around right now?</li>
+                        <li>What have I said out loud but still don't fully believe?</li>
+                        <li>What do I need to grieve that I've been pretending doesn't hurt?</li>
+                        <li>What response from the AI hit harder than I expected? What did it touch?</li>
+                        <li>Where do I already know the answer—but want permission to believe it?</li>
+                        <li>What pattern is trying to repeat—and what would interrupt it?</li>
+                        <li>If I spoke to myself with the same tone I wish the AI used… what would I sound like?</li>
+                    </ul>
+                    <button class="btn btn-secondary" onclick="downloadPrompts()">Download All Prompts</button>
+                </div>
+
+                <div class="resource-section">
+                    <h2>🤖 Platform Guides</h2>
+                    <ul class="resource-list">
+                        <li><a href="https://claude.ai" target="_blank">Claude →</a></li>
+                        <li><a href="https://chat.openai.com" target="_blank">ChatGPT →</a></li>
+                        <li><a href="https://gemini.google.com" target="_blank">Gemini →</a></li>
+                    </ul>
+                </div>
+
+                <div class="resource-section">
+                    <h2>📚 Learn More About MAGIE</h2>
+                    <p>Created by Starling. Framework for therapeutic self-exploration with AI.</p>
+                    <button class="btn btn-secondary" onclick="showView('view-about')">Read Full Framework</button>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Breathing Exercise Modal -->
+    <div id="breathing-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeBreathing()">×</button>
+            <h2>Guided Breathing</h2>
+            <div class="breathing-circle">
+                <div class="breath-instruction" id="breath-instruction">Breathe In</div>
+            </div>
+            <div class="breath-count">Cycle <span id="breath-count">1</span> of 6</div>
+        </div>
+    </div>
+
+    <!-- Copy Confirmation Toast -->
+    <div id="copy-toast" class="toast hidden">✓ Copied to clipboard!</div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
