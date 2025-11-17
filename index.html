@@ -1866,7 +1866,11 @@ let supabase = null;
 let currentUser = null;
 
 function initSupabase() {
-    if (SUPABASE_URL === 'YOUR_PROJECT_URL_HERE' || SUPABASE_ANON_KEY === 'YOUR_ANON_KEY_HERE') {
+    // Check if Supabase credentials are configured
+    // Using .includes() to avoid sed replacement breaking the check
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY ||
+        SUPABASE_URL.includes('YOUR_PROJECT') ||
+        SUPABASE_ANON_KEY.includes('YOUR_ANON')) {
         console.warn('Supabase not configured. Running in localStorage-only mode.');
         console.warn('Follow SUPABASE_SETUP.md to enable cloud sync.');
         return false;
