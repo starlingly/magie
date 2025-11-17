@@ -1812,6 +1812,7 @@ summary {
             <div class="auth-tabs">
                 <button class="auth-tab active" onclick="switchAuthTab('signin')">Sign In</button>
                 <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+                <button class="auth-tab" onclick="switchAuthTab('reset')">Reset Password</button>
             </div>
 
             <div id="auth-error" class="auth-error hidden"></div>
@@ -1828,6 +1829,9 @@ summary {
                     <input type="password" id="signin-password" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Sign In</button>
+                <p style="text-align: center; margin-top: 1rem;">
+                    <button type="button" class="btn-text" onclick="switchAuthTab('reset')">Forgot password?</button>
+                </p>
             </form>
 
             <!-- Sign Up Form -->
@@ -1846,6 +1850,21 @@ summary {
                     <input type="password" id="signup-password-confirm" required minlength="6">
                 </div>
                 <button type="submit" class="btn btn-primary">Create Account</button>
+            </form>
+
+            <!-- Reset Password Form -->
+            <form id="reset-form" class="auth-form" onsubmit="handlePasswordReset(event)">
+                <p style="color: var(--text-medium); margin-bottom: 1.5rem;">
+                    Enter your email address and we'll send you a link to reset your password.
+                </p>
+                <div class="form-group">
+                    <label for="reset-email">Email</label>
+                    <input type="email" id="reset-email" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Send Reset Link</button>
+                <p style="text-align: center; margin-top: 1rem;">
+                    <button type="button" class="btn-text" onclick="switchAuthTab('signin')">Back to Sign In</button>
+                </p>
             </form>
         </div>
     </div>
@@ -1936,7 +1955,9 @@ function switchAuthTab(tab) {
     document.querySelectorAll('.auth-tab').forEach(btn => {
         btn.classList.remove('active');
     });
-    event.target.classList.add('active');
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
 
     // Update forms
     document.querySelectorAll('.auth-form').forEach(form => {
@@ -1945,8 +1966,10 @@ function switchAuthTab(tab) {
 
     if (tab === 'signin') {
         document.getElementById('signin-form').classList.add('active');
-    } else {
+    } else if (tab === 'signup') {
         document.getElementById('signup-form').classList.add('active');
+    } else if (tab === 'reset') {
+        document.getElementById('reset-form').classList.add('active');
     }
 
     clearAuthMessages();
@@ -2056,6 +2079,38 @@ async function handleSignOut() {
     } catch (error) {
         console.error('Sign out error:', error);
         alert('Error signing out. Please try again.');
+    }
+}
+
+async function handlePasswordReset(event) {
+    event.preventDefault();
+    clearAuthMessages();
+
+    if (!supabase) {
+        showAuthError('Supabase is not configured. Please set up Supabase first.');
+        return;
+    }
+
+    const email = document.getElementById('reset-email').value;
+
+    try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/magie`,
+        });
+
+        if (error) throw error;
+
+        showAuthSuccess('Password reset link sent! Check your email.');
+
+        // Clear the form
+        document.getElementById('reset-form').reset();
+
+        // Switch back to sign in after a delay
+        setTimeout(() => {
+            switchAuthTab('signin');
+        }, 3000);
+    } catch (error) {
+        showAuthError(error.message);
     }
 }
 
