@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAGIE Companion - Therapeutic Self-Exploration with AI</title>
+    <title>MAGIE - Therapeutic Self-Exploration with AI</title>
     <meta name="description" content="A guide for therapeutic self-exploration with artificial intelligence. Build your practice, create your Primer, and track your healing journey.">
 
     <!-- Supabase Client -->
@@ -1081,15 +1081,28 @@ summary {
 }
 
 .breathing-circle {
-    width: 200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
     margin: 2rem auto;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    animation: breathe 8s infinite;
+    transition: transform 2s ease-in-out, background 0.5s ease;
+}
+
+.breathing-circle.inhale {
+    transform: scale(1.3);
+}
+
+.breathing-circle.exhale {
+    transform: scale(1);
+}
+
+.breathing-circle.hold {
+    background: linear-gradient(135deg, var(--secondary-color), #38B2AC);
 }
 
 @keyframes breathe {
@@ -1108,6 +1121,15 @@ summary {
     color: white;
     font-size: 1.5rem;
     font-weight: 600;
+    text-align: center;
+}
+
+.breath-timer {
+    color: white;
+    font-size: 3rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+    text-align: center;
 }
 
 .breath-count {
@@ -1817,6 +1839,82 @@ summary {
                     <h3>📊 View My Journey</h3>
                     <p>See your progress over time</p>
                 </div>
+
+                <div class="action-card" onclick="showAccountSettings()">
+                    <h3>⚙️ Account Settings</h3>
+                    <p>Manage your profile and account</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ACCOUNT SETTINGS -->
+        <section id="view-account-settings" class="view">
+            <button class="btn-back" onclick="showDashboard()">← Back to Dashboard</button>
+
+            <h1>Account Settings</h1>
+
+            <div style="background-color: var(--bg-white); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+                <h2 style="margin-bottom: 1.5rem;">Your Profile</h2>
+
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="account-email" disabled style="background-color: var(--bg-gray); cursor: not-allowed;">
+                    <small>Your email address cannot be changed</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="account-name">Name / Preferred Name</label>
+                    <input type="text" id="account-name" placeholder="How would you like to be called?">
+                    <small>This is how MAGIE will greet you</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="account-pronouns">Pronouns (optional)</label>
+                    <input type="text" id="account-pronouns" placeholder="e.g., they/them, she/her, he/him">
+                </div>
+
+                <button class="btn btn-primary" onclick="saveAccountProfile()">Save Profile</button>
+            </div>
+
+            <div style="background-color: var(--bg-white); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+                <h2 style="margin-bottom: 1.5rem;">Security</h2>
+
+                <div id="change-password-section">
+                    <p style="color: var(--text-medium); margin-bottom: 1rem;">
+                        Keep your account secure by using a strong password.
+                    </p>
+                    <button class="btn btn-secondary" onclick="showChangePasswordForm()">Change Password</button>
+                </div>
+
+                <div id="change-password-form" style="display: none;">
+                    <form onsubmit="handleChangePassword(event)">
+                        <div class="form-group">
+                            <label for="current-password">Current Password</label>
+                            <input type="password" id="current-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password-change">New Password</label>
+                            <input type="password" id="new-password-change" required minlength="6">
+                            <small>At least 6 characters</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password-change-confirm">Confirm New Password</label>
+                            <input type="password" id="new-password-change-confirm" required minlength="6">
+                        </div>
+                        <div id="password-change-error" class="auth-error hidden"></div>
+                        <div id="password-change-success" class="auth-success hidden"></div>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                        <button type="button" class="btn btn-outline" onclick="hideChangePasswordForm()" style="margin-left: 1rem;">Cancel</button>
+                    </form>
+                </div>
+            </div>
+
+            <div style="background-color: var(--bg-white); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border-left: 4px solid var(--error-color);">
+                <h2 style="margin-bottom: 1.5rem; color: var(--error-color);">Sign Out</h2>
+                <p style="color: var(--text-medium); margin-bottom: 1rem;">
+                    You can sign out of your account at any time. Your data will be saved securely in the cloud.
+                </p>
+                <button class="btn btn-outline" onclick="handleSignOut()" style="color: var(--error-color); border-color: var(--error-color);">Sign Out</button>
             </div>
         </section>
 
@@ -1878,6 +1976,7 @@ summary {
             <h2>Guided Breathing</h2>
             <div class="breathing-circle">
                 <div class="breath-instruction" id="breath-instruction">Breathe In</div>
+                <div class="breath-timer" id="breath-timer">2</div>
             </div>
             <div class="breath-count">Cycle <span id="breath-count">1</span> of 6</div>
         </div>
@@ -1892,6 +1991,7 @@ summary {
             <div class="auth-tabs">
                 <button class="auth-tab active" onclick="switchAuthTab('signin')">Sign In</button>
                 <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+                <button class="auth-tab" onclick="switchAuthTab('reset')">Reset Password</button>
             </div>
 
             <div id="auth-error" class="auth-error hidden"></div>
@@ -1908,6 +2008,9 @@ summary {
                     <input type="password" id="signin-password" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Sign In</button>
+                <p style="text-align: center; margin-top: 1rem;">
+                    <button type="button" class="btn-text" onclick="switchAuthTab('reset')">Forgot password?</button>
+                </p>
             </form>
 
             <!-- Sign Up Form -->
@@ -1926,6 +2029,38 @@ summary {
                     <input type="password" id="signup-password-confirm" required minlength="6">
                 </div>
                 <button type="submit" class="btn btn-primary">Create Account</button>
+            </form>
+
+            <!-- Reset Password Form -->
+            <form id="reset-form" class="auth-form" onsubmit="handlePasswordReset(event)">
+                <p style="color: var(--text-medium); margin-bottom: 1.5rem;">
+                    Enter your email address and we'll send you a link to reset your password.
+                </p>
+                <div class="form-group">
+                    <label for="reset-email">Email</label>
+                    <input type="email" id="reset-email" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Send Reset Link</button>
+                <p style="text-align: center; margin-top: 1rem;">
+                    <button type="button" class="btn-text" onclick="switchAuthTab('signin')">Back to Sign In</button>
+                </p>
+            </form>
+
+            <!-- Update Password Form (shown after clicking email link) -->
+            <form id="update-password-form" class="auth-form" onsubmit="handlePasswordUpdate(event)">
+                <p style="color: var(--text-medium); margin-bottom: 1.5rem;">
+                    Enter your new password below.
+                </p>
+                <div class="form-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" required minlength="6">
+                    <small>At least 6 characters</small>
+                </div>
+                <div class="form-group">
+                    <label for="new-password-confirm">Confirm New Password</label>
+                    <input type="password" id="new-password-confirm" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary">Update Password</button>
             </form>
         </div>
     </div>
@@ -1946,7 +2081,11 @@ let supabase = null;
 let currentUser = null;
 
 function initSupabase() {
-    if (SUPABASE_URL === 'YOUR_PROJECT_URL_HERE' || SUPABASE_ANON_KEY === 'YOUR_ANON_KEY_HERE') {
+    // Check if Supabase credentials are configured
+    // Using .includes() to avoid sed replacement breaking the check
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY ||
+        SUPABASE_URL.includes('YOUR_PROJECT') ||
+        SUPABASE_ANON_KEY.includes('YOUR_ANON')) {
         console.warn('Supabase not configured. Running in localStorage-only mode.');
         console.warn('Follow SUPABASE_SETUP.md to enable cloud sync.');
         return false;
@@ -1991,8 +2130,33 @@ function setupAuthListener() {
             // Clear local data and return to landing
             MAGIE_Storage.clearAll();
             location.reload();
+        } else if (event === 'PASSWORD_RECOVERY') {
+            // User clicked password reset link - show new password form
+            console.log('Password recovery detected');
+            showPasswordUpdateModal();
         }
     });
+}
+
+// Handle password reset from email link
+async function checkForPasswordReset() {
+    if (!supabase) return;
+
+    // Check if there's a password reset token in the URL
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+    const type = hashParams.get('type');
+
+    if (type === 'recovery' && accessToken) {
+        // Show the password update modal
+        showPasswordUpdateModal();
+    }
+}
+
+function showPasswordUpdateModal() {
+    // Show auth modal with a special update password form
+    document.getElementById('auth-modal').classList.remove('hidden');
+    switchAuthTab('update-password');
 }
 
 /* ===== Authentication Functions ===== */
@@ -2012,7 +2176,9 @@ function switchAuthTab(tab) {
     document.querySelectorAll('.auth-tab').forEach(btn => {
         btn.classList.remove('active');
     });
-    event.target.classList.add('active');
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
 
     // Update forms
     document.querySelectorAll('.auth-form').forEach(form => {
@@ -2021,8 +2187,17 @@ function switchAuthTab(tab) {
 
     if (tab === 'signin') {
         document.getElementById('signin-form').classList.add('active');
-    } else {
+    } else if (tab === 'signup') {
         document.getElementById('signup-form').classList.add('active');
+    } else if (tab === 'reset') {
+        document.getElementById('reset-form').classList.add('active');
+    } else if (tab === 'update-password') {
+        document.getElementById('update-password-form').classList.add('active');
+        // Hide the tabs when showing update password form
+        document.querySelector('.auth-tabs').style.display = 'none';
+    } else {
+        // Show tabs for other forms
+        document.querySelector('.auth-tabs').style.display = 'flex';
     }
 
     clearAuthMessages();
@@ -2132,6 +2307,80 @@ async function handleSignOut() {
     } catch (error) {
         console.error('Sign out error:', error);
         alert('Error signing out. Please try again.');
+    }
+}
+
+async function handlePasswordReset(event) {
+    event.preventDefault();
+    clearAuthMessages();
+
+    if (!supabase) {
+        showAuthError('Supabase is not configured. Please set up Supabase first.');
+        return;
+    }
+
+    const email = document.getElementById('reset-email').value;
+
+    try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/magie`,
+        });
+
+        if (error) throw error;
+
+        showAuthSuccess('Password reset link sent! Check your email.');
+
+        // Clear the form
+        document.getElementById('reset-form').reset();
+
+        // Switch back to sign in after a delay
+        setTimeout(() => {
+            switchAuthTab('signin');
+        }, 3000);
+    } catch (error) {
+        showAuthError(error.message);
+    }
+}
+
+async function handlePasswordUpdate(event) {
+    event.preventDefault();
+    clearAuthMessages();
+
+    if (!supabase) {
+        showAuthError('Supabase is not configured. Please set up Supabase first.');
+        return;
+    }
+
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('new-password-confirm').value;
+
+    if (newPassword !== confirmPassword) {
+        showAuthError('Passwords do not match');
+        return;
+    }
+
+    try {
+        const { error } = await supabase.auth.updateUser({
+            password: newPassword
+        });
+
+        if (error) throw error;
+
+        showAuthSuccess('Password updated successfully! Redirecting...');
+
+        // Clear the form
+        document.getElementById('update-password-form').reset();
+
+        // Clear the URL hash
+        window.history.replaceState(null, '', window.location.pathname);
+
+        // Redirect to dashboard after a delay
+        setTimeout(() => {
+            closeAuthModal();
+            showDashboard();
+        }, 2000);
+    } catch (error) {
+        showAuthError(error.message);
     }
 }
 
@@ -2564,6 +2813,8 @@ const MAGIE_Storage = {
                 user_id: currentUser.id,
                 show_crisis_banner: settings.showCrisisBanner,
                 onboarding_complete: true,
+                user_name: settings.userName || null,
+                pronouns: settings.pronouns || null,
                 updated_at: new Date().toISOString()
             };
 
@@ -2609,7 +2860,9 @@ const MAGIE_Storage = {
 
             const settings = {
                 showCrisisBanner: data.show_crisis_banner,
-                onboardingComplete: data.onboarding_complete
+                onboardingComplete: data.onboarding_complete,
+                userName: data.user_name || '',
+                pronouns: data.pronouns || ''
             };
 
             localStorage.setItem(this.KEYS.SETTINGS, JSON.stringify(settings));
@@ -2678,6 +2931,8 @@ async function initializeApp() {
                 showToast('✓ Email confirmed! Welcome to MAGIE.');
             }, 500);
         }
+        // Check for password reset in URL
+        await checkForPasswordReset();
 
         // Check if user is already signed in
         const user = await checkAuth();
@@ -3087,13 +3342,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function showDashboard() {
     const primer = MAGIE_Storage.getPrimer();
+    const settings = MAGIE_Storage.getSettings();
     const sessionCount = MAGIE_Storage.getSessionCount();
     const daysPracticing = MAGIE_Storage.getDaysPracticing();
 
-    // Update dashboard data
-    if (primer && primer.name) {
-        document.getElementById('dashboard-name').textContent = primer.name;
-    }
+    // Update dashboard data - prefer userName from settings, fall back to primer name
+    const displayName = settings.userName || (primer && primer.name) || 'Friend';
+    document.getElementById('dashboard-name').textContent = displayName;
+
     document.getElementById('total-sessions').textContent = sessionCount;
     document.getElementById('days-practicing').textContent = daysPracticing;
 
@@ -3149,9 +3405,133 @@ function showJourney() {
     alert('Journey tracking coming soon!\n\nThis will show:\n\n• Session history\n• Emotional themes over time\n• Your saved insights\n• Progress markers');
 }
 
+// ===== ACCOUNT SETTINGS =====
+
+async function showAccountSettings() {
+    // Load user profile data
+    if (currentUser) {
+        document.getElementById('account-email').value = currentUser.email;
+
+        // Load name and pronouns from settings
+        const settings = MAGIE_Storage.getSettings();
+        if (settings.userName) {
+            document.getElementById('account-name').value = settings.userName;
+        }
+        if (settings.pronouns) {
+            document.getElementById('account-pronouns').value = settings.pronouns;
+        }
+    }
+
+    showView('view-account-settings');
+}
+
+async function saveAccountProfile() {
+    const name = document.getElementById('account-name').value;
+    const pronouns = document.getElementById('account-pronouns').value;
+
+    // Save to local storage
+    MAGIE_Storage.updateSettings({
+        userName: name,
+        pronouns: pronouns
+    });
+
+    // Save to Supabase if available
+    if (supabase && currentUser) {
+        await MAGIE_Storage.syncSettingsToSupabase({
+            userName: name,
+            pronouns: pronouns,
+            showCrisisBanner: MAGIE_Storage.getSettings().showCrisisBanner
+        });
+    }
+
+    // Update the dashboard name
+    if (name) {
+        document.getElementById('dashboard-name').textContent = name;
+    }
+
+    showToast('✓ Profile updated!');
+}
+
+function showChangePasswordForm() {
+    document.getElementById('change-password-section').style.display = 'none';
+    document.getElementById('change-password-form').style.display = 'block';
+    // Clear any previous messages
+    document.getElementById('password-change-error').classList.add('hidden');
+    document.getElementById('password-change-success').classList.add('hidden');
+}
+
+function hideChangePasswordForm() {
+    document.getElementById('change-password-section').style.display = 'block';
+    document.getElementById('change-password-form').style.display = 'none';
+    // Clear form
+    document.getElementById('current-password').value = '';
+    document.getElementById('new-password-change').value = '';
+    document.getElementById('new-password-change-confirm').value = '';
+}
+
+async function handleChangePassword(event) {
+    event.preventDefault();
+
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password-change').value;
+    const confirmPassword = document.getElementById('new-password-change-confirm').value;
+
+    // Clear previous messages
+    document.getElementById('password-change-error').classList.add('hidden');
+    document.getElementById('password-change-success').classList.add('hidden');
+
+    if (newPassword !== confirmPassword) {
+        const errorEl = document.getElementById('password-change-error');
+        errorEl.textContent = 'Passwords do not match';
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    if (!supabase) {
+        const errorEl = document.getElementById('password-change-error');
+        errorEl.textContent = 'Authentication not available';
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    try {
+        // First verify current password by attempting to sign in
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: currentUser.email,
+            password: currentPassword
+        });
+
+        if (signInError) {
+            throw new Error('Current password is incorrect');
+        }
+
+        // Update to new password
+        const { error: updateError } = await supabase.auth.updateUser({
+            password: newPassword
+        });
+
+        if (updateError) throw updateError;
+
+        const successEl = document.getElementById('password-change-success');
+        successEl.textContent = 'Password updated successfully!';
+        successEl.classList.remove('hidden');
+
+        // Clear and hide form after success
+        setTimeout(() => {
+            hideChangePasswordForm();
+        }, 2000);
+
+    } catch (error) {
+        const errorEl = document.getElementById('password-change-error');
+        errorEl.textContent = error.message;
+        errorEl.classList.remove('hidden');
+    }
+}
+
 // ===== BREATHING EXERCISE =====
 
 let breathingInterval = null;
+let breathingPhaseInterval = null;
 let breathingCycle = 0;
 
 function startBreathing() {
@@ -3173,30 +3553,92 @@ function startBreathing() {
 function updateBreathingCycle() {
     document.getElementById('breath-count').textContent = breathingCycle + 1;
 
-    // Alternate instruction
     const instruction = document.getElementById('breath-instruction');
+    const timer = document.getElementById('breath-timer');
+    const circle = document.querySelector('.breathing-circle');
     let phase = 0;
+    let countdown = 2;
 
-    const breathePhases = setInterval(() => {
+    // Clear any existing phase interval
+    if (breathingPhaseInterval) {
+        clearInterval(breathingPhaseInterval);
+    }
+
+    // Helper function to update countdown every second
+    let countdownInterval;
+    function startCountdown() {
+        countdown = 2;
+        timer.textContent = countdown;
+
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+        }
+
+        countdownInterval = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+                timer.textContent = countdown;
+            }
+        }, 1000);
+    }
+
+    // Start with breathe in
+    instruction.textContent = 'Breathe In';
+    circle.classList.remove('exhale', 'hold');
+    circle.classList.add('inhale');
+    startCountdown();
+
+    breathingPhaseInterval = setInterval(() => {
         phase++;
         if (phase === 1) {
-            instruction.textContent = 'Breathe In';
+            // Hold after inhale
+            instruction.textContent = 'Hold';
+            circle.classList.remove('inhale', 'exhale');
+            circle.classList.add('hold');
+            startCountdown();
         } else if (phase === 2) {
-            instruction.textContent = 'Hold';
-        } else if (phase === 3) {
+            // Breathe out
             instruction.textContent = 'Breathe Out';
-        } else if (phase === 4) {
+            circle.classList.remove('inhale', 'hold');
+            circle.classList.add('exhale');
+            startCountdown();
+        } else if (phase === 3) {
+            // Hold after exhale
             instruction.textContent = 'Hold';
-            clearInterval(breathePhases);
+            circle.classList.remove('inhale', 'exhale');
+            circle.classList.add('hold');
+            startCountdown();
+
+            // Clean up
+            setTimeout(() => {
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                }
+            }, 2000);
+
+            clearInterval(breathingPhaseInterval);
+            breathingPhaseInterval = null;
         }
     }, 2000);
 }
 
 function closeBreathing() {
     document.getElementById('breathing-modal').classList.add('hidden');
+
+    // Clear all intervals
     if (breathingInterval) {
         clearInterval(breathingInterval);
         breathingInterval = null;
+    }
+    if (breathingPhaseInterval) {
+        clearInterval(breathingPhaseInterval);
+        breathingPhaseInterval = null;
+    }
+
+    // Reset circle classes
+    const circle = document.querySelector('.breathing-circle');
+    if (circle) {
+        circle.classList.remove('inhale', 'exhale', 'hold');
     }
 }
 
