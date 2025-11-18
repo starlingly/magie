@@ -587,6 +587,20 @@ a:hover {
     text-align: left;
 }
 
+.ai-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.ai-link:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
 .ai-details p {
     font-size: 0.875rem;
     margin-bottom: 0.5rem;
@@ -1471,15 +1485,14 @@ summary {
             <button class="btn-back" onclick="showView('view-understanding')">← Back</button>
 
             <h1>Which AI Will You Talk To?</h1>
-            <p class="subtitle">Don't overthink this. You can always switch later.</p>
+            <p class="subtitle">MAGIE is free. You'll use your own AI account. Pick one below or decide later.</p>
 
             <div class="ai-comparison">
                 <div class="ai-card">
                     <h3>Claude</h3>
                     <div class="ai-details">
-                        <p><strong>Cost:</strong> $20/month (or free trial)</p>
-                        <p><strong>Style:</strong> Gentle, reflective</p>
-                        <p><strong>Best for:</strong> Depth and emotional nuance</p>
+                        <p>Gentle, reflective, great for depth and emotional nuance</p>
+                        <a href="https://claude.ai" target="_blank" class="ai-link">Visit Claude.ai →</a>
                     </div>
                     <button class="btn btn-outline" onclick="selectAI('claude')">Choose Claude</button>
                 </div>
@@ -1487,29 +1500,62 @@ summary {
                 <div class="ai-card">
                     <h3>ChatGPT</h3>
                     <div class="ai-details">
-                        <p><strong>Cost:</strong> Free or $20/month</p>
-                        <p><strong>Style:</strong> Casual, accessible</p>
-                        <p><strong>Best for:</strong> Easy access and familiarity</p>
+                        <p>Casual, accessible, widely familiar</p>
+                        <a href="https://chatgpt.com" target="_blank" class="ai-link">Visit ChatGPT.com →</a>
                     </div>
                     <button class="btn btn-outline" onclick="selectAI('chatgpt')">Choose ChatGPT</button>
                 </div>
 
                 <div class="ai-card">
-                    <h3>Gemini</h3>
+                    <h3>Gemini (AI Studio)</h3>
                     <div class="ai-details">
-                        <p><strong>Cost:</strong> Free or $20/month</p>
-                        <p><strong>Style:</strong> Varied, adaptable</p>
-                        <p><strong>Best for:</strong> Experimenting</p>
+                        <p>More advanced interface with system instructions</p>
+                        <a href="https://aistudio.google.com" target="_blank" class="ai-link">Visit AI Studio →</a>
+                    </div>
+                    <button class="btn btn-outline" onclick="selectAI('gemini-studio')">Choose Gemini Studio</button>
+                </div>
+
+                <div class="ai-card">
+                    <h3>Gemini (Web)</h3>
+                    <div class="ai-details">
+                        <p>Simple web interface, easy to use</p>
+                        <a href="https://gemini.google.com" target="_blank" class="ai-link">Visit Gemini →</a>
                     </div>
                     <button class="btn btn-outline" onclick="selectAI('gemini')">Choose Gemini</button>
                 </div>
 
                 <div class="ai-card">
-                    <h3>Other / Not Sure</h3>
+                    <h3>Grok</h3>
                     <div class="ai-details">
-                        <p><strong>Cost:</strong> Varies</p>
-                        <p><strong>Style:</strong> Your choice</p>
-                        <p><strong>Best for:</strong> Advanced users or exploring</p>
+                        <p>Direct, conversational, integrated with X/Twitter</p>
+                        <a href="https://x.com/i/grok" target="_blank" class="ai-link">Visit Grok →</a>
+                    </div>
+                    <button class="btn btn-outline" onclick="selectAI('grok')">Choose Grok</button>
+                </div>
+
+                <div class="ai-card">
+                    <h3>Copilot</h3>
+                    <div class="ai-details">
+                        <p>Microsoft's AI, integrated with Bing and Office</p>
+                        <a href="https://copilot.microsoft.com" target="_blank" class="ai-link">Visit Copilot →</a>
+                    </div>
+                    <button class="btn btn-outline" onclick="selectAI('copilot')">Choose Copilot</button>
+                </div>
+
+                <div class="ai-card">
+                    <h3>Mistral</h3>
+                    <div class="ai-details">
+                        <p>European AI with strong multilingual support</p>
+                        <a href="https://chat.mistral.ai" target="_blank" class="ai-link">Visit Mistral →</a>
+                    </div>
+                    <button class="btn btn-outline" onclick="selectAI('mistral')">Choose Mistral</button>
+                </div>
+
+                <div class="ai-card">
+                    <h3>Others</h3>
+                    <div class="ai-details">
+                        <p>DeepSeek, GLM, Kimi, Qwen, and more</p>
+                        <p style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--text-light);">Choose this if you're using another AI or still deciding</p>
                     </div>
                     <button class="btn btn-outline" onclick="selectAI('other')">I'll Decide Later</button>
                 </div>
@@ -2782,6 +2828,10 @@ function selectAI(aiName) {
         'claude': 'Claude',
         'chatgpt': 'ChatGPT',
         'gemini': 'Gemini',
+        'gemini-studio': 'Gemini (AI Studio)',
+        'grok': 'Grok',
+        'copilot': 'Copilot',
+        'mistral': 'Mistral',
         'other': 'Other/Undecided'
     };
 
@@ -2984,8 +3034,12 @@ function setupFirstSession() {
         // Set platform link
         const platformLinks = {
             'Claude': '<a href="https://claude.ai" target="_blank">claude.ai →</a>',
-            'ChatGPT': '<a href="https://chat.openai.com" target="_blank">chat.openai.com →</a>',
+            'ChatGPT': '<a href="https://chatgpt.com" target="_blank">chatgpt.com →</a>',
             'Gemini': '<a href="https://gemini.google.com" target="_blank">gemini.google.com →</a>',
+            'Gemini (AI Studio)': '<a href="https://aistudio.google.com" target="_blank">aistudio.google.com →</a>',
+            'Grok': '<a href="https://x.com/i/grok" target="_blank">x.com/i/grok →</a>',
+            'Copilot': '<a href="https://copilot.microsoft.com" target="_blank">copilot.microsoft.com →</a>',
+            'Mistral': '<a href="https://chat.mistral.ai" target="_blank">chat.mistral.ai →</a>',
             'Other/Undecided': 'Open your chosen AI platform'
         };
 
