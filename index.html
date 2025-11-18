@@ -1488,7 +1488,7 @@ summary {
 
             <div id="ai-selected" class="selection-confirmation hidden">
                 <p>✓ You've selected: <strong id="selected-ai-name"></strong></p>
-                <button class="btn btn-primary" onclick="nextStep('view-primer-wizard')">Ready - Build My Primer</button>
+                <button id="build-primer-btn" class="btn btn-primary" onclick="nextStep('view-primer-wizard')">Ready - Build My Primer</button>
             </div>
         </section>
 
@@ -2757,6 +2757,14 @@ function selectAI(aiName) {
     event.target.closest('.ai-card').style.borderColor = 'var(--primary-color)';
     event.target.closest('.ai-card').style.borderWidth = '2px';
     event.target.closest('.ai-card').style.borderStyle = 'solid';
+
+    // Scroll to the "Ready - Build My Primer" button
+    setTimeout(() => {
+        const buildButton = document.getElementById('build-primer-btn');
+        if (buildButton) {
+            buildButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100); // Small delay to ensure the button is visible first
 }
 
 // ===== PRIMER WIZARD =====
