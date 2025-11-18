@@ -1049,12 +1049,13 @@ summary {
 }
 
 .breathing-circle {
-    width: 200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
     margin: 2rem auto;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     transition: transform 2s ease-in-out, background 0.5s ease;
@@ -1088,6 +1089,15 @@ summary {
     color: white;
     font-size: 1.5rem;
     font-weight: 600;
+    text-align: center;
+}
+
+.breath-timer {
+    color: white;
+    font-size: 3rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+    text-align: center;
 }
 
 .breath-count {
@@ -1886,6 +1896,7 @@ summary {
             <h2>Guided Breathing</h2>
             <div class="breathing-circle">
                 <div class="breath-instruction" id="breath-instruction">Breathe In</div>
+                <div class="breath-timer" id="breath-timer">2</div>
             </div>
             <div class="breath-count">Cycle <span id="breath-count">1</span> of 6</div>
         </div>
@@ -3424,18 +3435,39 @@ function updateBreathingCycle() {
     document.getElementById('breath-count').textContent = breathingCycle + 1;
 
     const instruction = document.getElementById('breath-instruction');
+    const timer = document.getElementById('breath-timer');
     const circle = document.querySelector('.breathing-circle');
     let phase = 0;
+    let countdown = 2;
 
     // Clear any existing phase interval
     if (breathingPhaseInterval) {
         clearInterval(breathingPhaseInterval);
     }
 
+    // Helper function to update countdown every second
+    let countdownInterval;
+    function startCountdown() {
+        countdown = 2;
+        timer.textContent = countdown;
+
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+        }
+
+        countdownInterval = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+                timer.textContent = countdown;
+            }
+        }, 1000);
+    }
+
     // Start with breathe in
     instruction.textContent = 'Breathe In';
     circle.classList.remove('exhale', 'hold');
     circle.classList.add('inhale');
+    startCountdown();
 
     breathingPhaseInterval = setInterval(() => {
         phase++;
@@ -3444,16 +3476,27 @@ function updateBreathingCycle() {
             instruction.textContent = 'Hold';
             circle.classList.remove('inhale', 'exhale');
             circle.classList.add('hold');
+            startCountdown();
         } else if (phase === 2) {
             // Breathe out
             instruction.textContent = 'Breathe Out';
             circle.classList.remove('inhale', 'hold');
             circle.classList.add('exhale');
+            startCountdown();
         } else if (phase === 3) {
             // Hold after exhale
             instruction.textContent = 'Hold';
             circle.classList.remove('inhale', 'exhale');
             circle.classList.add('hold');
+            startCountdown();
+
+            // Clean up
+            setTimeout(() => {
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                }
+            }, 2000);
+
             clearInterval(breathingPhaseInterval);
             breathingPhaseInterval = null;
         }
