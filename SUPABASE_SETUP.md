@@ -66,6 +66,8 @@ CREATE TABLE user_settings (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
   show_crisis_banner BOOLEAN DEFAULT true,
   onboarding_complete BOOLEAN DEFAULT false,
+  user_name TEXT,
+  pronouns TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -147,6 +149,17 @@ CREATE TRIGGER update_user_settings_updated_at
 
 4. Click **Run** (or press Cmd/Ctrl + Enter)
 5. You should see "Success. No rows returned"
+
+### Already Created Your Tables?
+
+If you already created the `user_settings` table before, you need to add the new columns. Run this SQL:
+
+```sql
+-- Add new profile fields to existing user_settings table
+ALTER TABLE user_settings
+ADD COLUMN IF NOT EXISTS user_name TEXT,
+ADD COLUMN IF NOT EXISTS pronouns TEXT;
+```
 
 ## Step 5: Configure Email Authentication
 
