@@ -225,6 +225,24 @@ a:hover {
     color: var(--primary-color);
 }
 
+.btn-dashboard {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--text-medium);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: inline-block;
+    z-index: 10;
+}
+
+.btn-dashboard:hover {
+    color: var(--primary-color);
+}
+
 /* Views */
 .view {
     display: none;
@@ -1248,6 +1266,7 @@ summary {
 
         <!-- ABOUT / LEARN MORE -->
         <section id="view-about" class="view">
+            <button class="btn-dashboard" onclick="showDashboard()" style="display:none;" id="dashboard-link-about">→ Dashboard</button>
             <button class="btn-back" onclick="showView('view-landing')">← Back</button>
 
             <h1>What is MAGIE?</h1>
@@ -1295,6 +1314,11 @@ summary {
                             <p>This is a dialogue. You show up. It shows up. That's engagement.</p>
                         </div>
                     </div>
+                </div>
+
+                <div style="text-align: center; margin: 2rem 0; padding: 1.5rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1)); border-radius: 12px;">
+                    <p style="margin-bottom: 1rem; font-size: 1.1rem;">Want to dive deeper into the full framework?</p>
+                    <a href="https://starlingly.substack.com/p/ai-llms-therapeutic" target="_blank" class="btn btn-primary" style="text-decoration: none;">Read the Complete Framework on Substack →</a>
                 </div>
 
                 <div class="cta-section">
@@ -1510,7 +1534,7 @@ summary {
 
             <div id="ai-selected" class="selection-confirmation hidden">
                 <p>✓ You've selected: <strong id="selected-ai-name"></strong></p>
-                <button class="btn btn-primary" onclick="nextStep('view-primer-wizard')">Ready - Build My Primer</button>
+                <button id="build-primer-btn" class="btn btn-primary" onclick="nextStep('view-primer-wizard')">Ready - Build My Primer</button>
             </div>
         </section>
 
@@ -1628,6 +1652,7 @@ summary {
 
         <!-- STEP 6: PRIMER PREVIEW -->
         <section id="view-primer-preview" class="view">
+            <button class="btn-dashboard" onclick="showDashboard()">→ Dashboard</button>
             <div class="step-indicator">Step 6 of 7</div>
             <button class="btn-back" onclick="showView('view-primer-wizard')">← Edit Primer</button>
 
@@ -1652,6 +1677,7 @@ summary {
 
         <!-- STEP 7: FIRST SESSION GUIDE -->
         <section id="view-first-session" class="view">
+            <button class="btn-dashboard" onclick="showDashboard()">→ Dashboard</button>
             <div class="step-indicator">Step 7 of 7</div>
 
             <h1>Your First MAGIE Session</h1>
@@ -1842,6 +1868,7 @@ summary {
 
         <!-- RESOURCES PAGE -->
         <section id="view-resources" class="view">
+            <button class="btn-dashboard" onclick="showDashboard()">→ Dashboard</button>
             <button class="btn-back" onclick="showDashboard()">← Back to Dashboard</button>
 
             <h1>Resources</h1>
@@ -1882,7 +1909,8 @@ summary {
                 <div class="resource-section">
                     <h2>📚 Learn More About MAGIE</h2>
                     <p>Created by Starling. Framework for therapeutic self-exploration with AI.</p>
-                    <button class="btn btn-secondary" onclick="showView('view-about')">Read Full Framework</button>
+                    <button class="btn btn-secondary" onclick="showView('view-about')">Read Framework Summary</button>
+                    <a href="https://starlingly.substack.com/p/ai-llms-therapeutic" target="_blank" class="btn btn-primary" style="display: inline-block; margin-top: 0.5rem; text-decoration: none;">Read Full Framework on Substack →</a>
                 </div>
             </div>
         </section>
@@ -2903,6 +2931,14 @@ function showView(viewId) {
         targetView.classList.add('active');
         window.scrollTo(0, 0);
     }
+
+    // Show dashboard link on about page if user is logged in
+    if (viewId === 'view-about') {
+        const dashboardLink = document.getElementById('dashboard-link-about');
+        if (dashboardLink && currentUser) {
+            dashboardLink.style.display = 'inline-block';
+        }
+    }
 }
 
 function nextStep(viewId) {
@@ -3013,6 +3049,14 @@ function selectAI(aiName) {
     event.target.closest('.ai-card').style.borderColor = 'var(--primary-color)';
     event.target.closest('.ai-card').style.borderWidth = '2px';
     event.target.closest('.ai-card').style.borderStyle = 'solid';
+
+    // Scroll to the "Ready - Build My Primer" button
+    setTimeout(() => {
+        const buildButton = document.getElementById('build-primer-btn');
+        if (buildButton) {
+            buildButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100); // Small delay to ensure the button is visible first
 }
 
 // ===== PRIMER WIZARD =====
