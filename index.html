@@ -1057,7 +1057,19 @@ summary {
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: breathe 8s infinite;
+    transition: transform 2s ease-in-out, background 0.5s ease;
+}
+
+.breathing-circle.inhale {
+    transform: scale(1.3);
+}
+
+.breathing-circle.exhale {
+    transform: scale(1);
+}
+
+.breathing-circle.hold {
+    background: linear-gradient(135deg, var(--secondary-color), #38B2AC);
 }
 
 @keyframes breathe {
@@ -3389,6 +3401,7 @@ async function handleChangePassword(event) {
 // ===== BREATHING EXERCISE =====
 
 let breathingInterval = null;
+let breathingPhaseInterval = null;
 let breathingCycle = 0;
 
 function startBreathing() {
@@ -3410,30 +3423,60 @@ function startBreathing() {
 function updateBreathingCycle() {
     document.getElementById('breath-count').textContent = breathingCycle + 1;
 
-    // Alternate instruction
     const instruction = document.getElementById('breath-instruction');
+    const circle = document.querySelector('.breathing-circle');
     let phase = 0;
 
-    const breathePhases = setInterval(() => {
+    // Clear any existing phase interval
+    if (breathingPhaseInterval) {
+        clearInterval(breathingPhaseInterval);
+    }
+
+    // Start with breathe in
+    instruction.textContent = 'Breathe In';
+    circle.classList.remove('exhale', 'hold');
+    circle.classList.add('inhale');
+
+    breathingPhaseInterval = setInterval(() => {
         phase++;
         if (phase === 1) {
-            instruction.textContent = 'Breathe In';
+            // Hold after inhale
+            instruction.textContent = 'Hold';
+            circle.classList.remove('inhale', 'exhale');
+            circle.classList.add('hold');
         } else if (phase === 2) {
-            instruction.textContent = 'Hold';
-        } else if (phase === 3) {
+            // Breathe out
             instruction.textContent = 'Breathe Out';
-        } else if (phase === 4) {
+            circle.classList.remove('inhale', 'hold');
+            circle.classList.add('exhale');
+        } else if (phase === 3) {
+            // Hold after exhale
             instruction.textContent = 'Hold';
-            clearInterval(breathePhases);
+            circle.classList.remove('inhale', 'exhale');
+            circle.classList.add('hold');
+            clearInterval(breathingPhaseInterval);
+            breathingPhaseInterval = null;
         }
     }, 2000);
 }
 
 function closeBreathing() {
     document.getElementById('breathing-modal').classList.add('hidden');
+
+    // Clear all intervals
     if (breathingInterval) {
         clearInterval(breathingInterval);
         breathingInterval = null;
+    }
+    if (breathingPhaseInterval) {
+        clearInterval(breathingPhaseInterval);
+        breathingPhaseInterval = null;
+    }
+
+    // Reset circle classes
+    const circle = document.querySelector('.breathing-circle');
+    if (circle) {
+        circle.classList.remove('inhale', 'exhale', 'hold');
     }
 }
 
