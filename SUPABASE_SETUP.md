@@ -150,6 +150,17 @@ CREATE TRIGGER update_user_settings_updated_at
 
 ## Step 5: Configure Email Authentication
 
+### 5.1 Set Redirect URLs
+
+**CRITICAL**: Configure redirect URLs to prevent 404 errors after email confirmation.
+
+1. In Supabase dashboard, go to **Authentication** → **URL Configuration**
+2. Set **Site URL** to: `https://starlingly.github.io/magie` (or your GitHub Pages URL)
+3. Add the same URL to **Redirect URLs**: `https://starlingly.github.io/magie`
+4. Click **Save**
+
+### 5.2 Enable Email Provider
+
 1. In Supabase dashboard, go to **Authentication** → **Providers**
 2. Make sure **Email** is enabled (it should be by default)
 3. Scroll down to **Email Templates** if you want to customize signup/reset emails (optional)
