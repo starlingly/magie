@@ -40,6 +40,18 @@ Don't worry if you're not a coder! Follow these steps exactly and you'll be up a
 6. Click **"Run"** (or press Ctrl+Enter on Windows, Cmd+Enter on Mac)
 7. You should see **"Success. No rows returned"** - that's good!
 
+### Step 5: Configure Email Authentication
+
+**IMPORTANT**: This prevents 404 errors when users confirm their email!
+
+1. In Supabase, click **"Authentication"** in the left sidebar
+2. Click **"URL Configuration"**
+3. Find the **"Site URL"** field and enter: `https://starlingly.github.io/magie`
+   - (Replace `starlingly` with your GitHub username if you forked this repo)
+4. Scroll down to **"Redirect URLs"**
+5. Click **"Add URL"** and enter the same URL: `https://starlingly.github.io/magie`
+6. Click **"Save"** at the bottom
+
 ✅ Supabase is now set up!
 
 ---

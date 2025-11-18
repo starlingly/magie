@@ -2663,6 +2663,22 @@ async function initializeApp() {
         // Set up auth listener
         setupAuthListener();
 
+        // Check for email confirmation or other auth callbacks in URL
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const type = hashParams.get('type');
+
+        // If this is an email confirmation callback, show success message
+        if (accessToken && type === 'signup') {
+            // Clean up the URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+
+            // Show success message
+            setTimeout(() => {
+                showToast('✓ Email confirmed! Welcome to MAGIE.');
+            }, 500);
+        }
+
         // Check if user is already signed in
         const user = await checkAuth();
 
