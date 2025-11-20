@@ -9,7 +9,11 @@
     <!-- Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Optional runtime configuration; copy config.example.js to config.js with your values -->
-    <script src="config.js"></script>
+    <script>
+        // Load config.js if it exists, otherwise use defaults
+        window.MAGIE_CONFIG = window.MAGIE_CONFIG || {};
+    </script>
+    <script src="config.js" onerror="console.log('config.js not found, using defaults')"></script>
 
     <link rel="stylesheet" href="style.css">
 </head>
