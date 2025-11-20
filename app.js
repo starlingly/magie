@@ -851,8 +851,6 @@ async function loadUserDataFromSupabase() {
     console.log('User data loaded from Supabase');
 }
 
-</script>
-    <script>
 /* ===== MAGIE Companion - Main Application ===== */
 
 // Initialize app on page load
