@@ -315,6 +315,41 @@ a:hover {
     border-left: 4px solid var(--warning-color);
 }
 
+/* Cloud Sync Status */
+.status-banner {
+    margin: 1rem 0;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background: var(--bg-gray);
+    color: var(--text-medium);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-banner.hidden {
+    display: none;
+}
+
+.status-banner.success {
+    border-color: var(--success-color);
+    background: #f0fff4;
+    color: var(--text-dark);
+}
+
+.status-banner.warning {
+    border-color: var(--warning-color);
+    background: #fffaf0;
+    color: var(--text-dark);
+}
+
+.status-banner.error {
+    border-color: var(--error-color);
+    background: #fff5f5;
+    color: var(--text-dark);
+}
+
 /* Cards */
 .about-content {
     background-color: var(--bg-white);
