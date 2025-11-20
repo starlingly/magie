@@ -1,16 +1,915 @@
+
+/* ===== MAGIE Companion - Supabase Configuration ===== */
+
+// IMPORTANT: Provide these via config.js (see config.example.js for template)
+const RUNTIME_CONFIG = window.MAGIE_CONFIG || {};
+const SUPABASE_URL = RUNTIME_CONFIG.supabaseUrl || '';
+const SUPABASE_ANON_KEY = RUNTIME_CONFIG.supabaseAnonKey || '';
+
+// Initialize Supabase client
+let supabase = null;
+let currentUser = null;
+
+function setCloudStatus(status, message) {
+    const statusEl = document.getElementById('cloud-status');
+    if (!statusEl) return;
+
+    statusEl.textContent = message;
+    statusEl.classList.remove('hidden', 'success', 'warning', 'error');
+
+    if (status) {
+        statusEl.classList.add(status);
+    }
+}
+
+function initSupabase() {
+    // Check if Supabase credentials are configured
+    // Using .includes() to avoid sed replacement breaking the check
+    const missingConfig = !SUPABASE_URL || !SUPABASE_ANON_KEY ||
+        SUPABASE_URL.includes('YOUR_PROJECT') ||
+        SUPABASE_ANON_KEY.includes('YOUR_ANON');
+
+    if (missingConfig) {
+        console.warn('Supabase not configured. Running in localStorage-only mode.');
+        console.warn('Follow SUPABASE_SETUP.md to enable cloud sync.');
+        setCloudStatus('warning', 'Cloud sync unavailable. Using local storage only. Add config.js to enable cloud backups.');
+        return false;
+    }
+
+    try {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('Supabase initialized successfully');
+        setCloudStatus('success', 'Cloud sync available. Sign in to enable syncing across devices.');
+        return true;
+    } catch (error) {
+        console.error('Failed to initialize Supabase:', error);
+        setCloudStatus('error', 'Cloud sync failed to initialize. Please check your Supabase configuration.');
+        return false;
+    }
+}
+
+// Check authentication state on load
+async function checkAuth() {
+    if (!supabase) return null;
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+        currentUser = session.user;
+        setCloudStatus('success', `Cloud sync active for ${currentUser.email}.`);
+        return currentUser;
+    }
+
+    setCloudStatus('success', 'Cloud sync available. Sign in to enable syncing across devices.');
+    return null;
+}
+
+// Listen for auth changes
+function setupAuthListener() {
+    if (!supabase) return;
+
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN') {
+            currentUser = session.user;
+            console.log('User signed in:', currentUser.email);
+            setCloudStatus('success', `Cloud sync active for ${currentUser.email}.`);
+            closeAuthModal();
+            // Reload user data from Supabase
+            loadUserDataFromSupabase();
+        } else if (event === 'SIGNED_OUT') {
+            currentUser = null;
+            console.log('User signed out');
+            setCloudStatus('success', 'Cloud sync available. Sign in to enable syncing across devices.');
+            // Clear local data and return to landing
+            MAGIE_Storage.clearAll();
+            location.reload();
+        } else if (event === 'PASSWORD_RECOVERY') {
+            // User clicked password reset link - show new password form
+            console.log('Password recovery detected');
+            showPasswordUpdateModal();
+        }
+    });
+}
+
+// Handle password reset from email link
+async function checkForPasswordReset() {
+    if (!supabase) return;
+
+    // Check if there's a password reset token in the URL
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+    const type = hashParams.get('type');
+
+    if (type === 'recovery' && accessToken) {
+        // Show the password update modal
+        showPasswordUpdateModal();
+    }
+}
+
+function showPasswordUpdateModal() {
+    // Show auth modal with a special update password form
+    document.getElementById('auth-modal').classList.remove('hidden');
+    switchAuthTab('update-password');
+}
+
+/* ===== Authentication Functions ===== */
+
+function showAuthModal() {
+    document.getElementById('auth-modal').classList.remove('hidden');
+    clearAuthMessages();
+}
+
+function closeAuthModal() {
+    document.getElementById('auth-modal').classList.add('hidden');
+    clearAuthMessages();
+}
+
+function switchAuthTab(tab) {
+    // Update tab buttons
+    document.querySelectorAll('.auth-tab').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
+
+    // Update forms
+    document.querySelectorAll('.auth-form').forEach(form => {
+        form.classList.remove('active');
+    });
+
+    if (tab === 'signin') {
+        document.getElementById('signin-form').classList.add('active');
+    } else if (tab === 'signup') {
+        document.getElementById('signup-form').classList.add('active');
+    } else if (tab === 'reset') {
+        document.getElementById('reset-form').classList.add('active');
+    } else if (tab === 'update-password') {
+        document.getElementById('update-password-form').classList.add('active');
+        // Hide the tabs when showing update password form
+        document.querySelector('.auth-tabs').style.display = 'none';
+    } else {
+        // Show tabs for other forms
+        document.querySelector('.auth-tabs').style.display = 'flex';
+    }
+
+    clearAuthMessages();
+}
+
+function clearAuthMessages() {
+    document.getElementById('auth-error').classList.add('hidden');
+    document.getElementById('auth-success').classList.add('hidden');
+}
+
+function showAuthError(message) {
+    const errorEl = document.getElementById('auth-error');
+    errorEl.textContent = message;
+    errorEl.classList.remove('hidden');
+}
+
+function showAuthSuccess(message) {
+    const successEl = document.getElementById('auth-success');
+    successEl.textContent = message;
+    successEl.classList.remove('hidden');
+}
+
+async function handleSignUp(event) {
+    event.preventDefault();
+    clearAuthMessages();
+
+    if (!supabase) {
+        showAuthError('Supabase is not configured. Please set up Supabase first.');
+        return;
+    }
+
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const passwordConfirm = document.getElementById('signup-password-confirm').value;
+
+    if (password !== passwordConfirm) {
+        showAuthError('Passwords do not match');
+        return;
+    }
+
+    try {
+        const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+        });
+
+        if (error) throw error;
+
+        showAuthSuccess('Account created! Please check your email to confirm your account.');
+
+        // Clear form
+        document.getElementById('signup-form').reset();
+
+        // Auto-sign in if email confirmation is disabled
+        if (data.session) {
+            setTimeout(() => {
+                closeAuthModal();
+                initializeApp();
+            }, 2000);
+        }
+    } catch (error) {
+        showAuthError(error.message);
+    }
+}
+
+async function handleSignIn(event) {
+    event.preventDefault();
+    clearAuthMessages();
+
+    if (!supabase) {
+        showAuthError('Supabase is not configured. Please set up Supabase first.');
+        return;
+    }
+
+    const email = document.getElementById('signin-email').value;
+    const password = document.getElementById('signin-password').value;
+
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        if (error) throw error;
+
+        currentUser = data.user;
+        closeAuthModal();
+
+        // Load user data and show dashboard
+        await loadUserDataFromSupabase();
+        showDashboard();
+    } catch (error) {
+        showAuthError(error.message);
+    }
+}
+
+async function handleSignOut() {
+    if (!supabase) return;
+
+    try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+
+        // Clear local storage and reload
+        MAGIE_Storage.clearAll();
+        location.reload();
+    } catch (error) {
+        console.error('Sign out error:', error);
+        alert('Error signing out. Please try again.');
+    }
+}
+
+async function handlePasswordReset(event) {
+    event.preventDefault();
+    clearAuthMessages();
+
+    if (!supabase) {
+        showAuthError('Supabase is not configured. Please set up Supabase first.');
+        return;
+    }
+
+    const email = document.getElementById('reset-email').value;
+
+    try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/magie`,
+        });
+
+        if (error) throw error;
+
+        showAuthSuccess('Password reset link sent! Check your email.');
+
+        // Clear the form
+        document.getElementById('reset-form').reset();
+
+        // Switch back to sign in after a delay
+        setTimeout(() => {
+            switchAuthTab('signin');
+        }, 3000);
+    } catch (error) {
+        showAuthError(error.message);
+    }
+}
+
+async function handlePasswordUpdate(event) {
+    event.preventDefault();
+    clearAuthMessages();
+
+    if (!supabase) {
+        showAuthError('Supabase is not configured. Please set up Supabase first.');
+        return;
+    }
+
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('new-password-confirm').value;
+
+    if (newPassword !== confirmPassword) {
+        showAuthError('Passwords do not match');
+        return;
+    }
+
+    try {
+        const { error } = await supabase.auth.updateUser({
+            password: newPassword
+        });
+
+        if (error) throw error;
+
+        showAuthSuccess('Password updated successfully! Redirecting...');
+
+        // Clear the form
+        document.getElementById('update-password-form').reset();
+
+        // Clear the URL hash
+        window.history.replaceState(null, '', window.location.pathname);
+
+        // Redirect to dashboard after a delay
+        setTimeout(() => {
+            closeAuthModal();
+            showDashboard();
+        }, 2000);
+    } catch (error) {
+        showAuthError(error.message);
+    }
+}
+
+/* ===== MAGIE Companion - Storage Management ===== */
+
+const MAGIE_Storage = {
+    // Keys for localStorage
+    KEYS: {
+        USER_DATA: 'magie_user_data',
+        PRIMER: 'magie_primer',
+        SESSIONS: 'magie_sessions',
+        SETTINGS: 'magie_settings'
+    },
+
+    // Initialize storage
+    init() {
+        if (!this.exists()) {
+            this.createDefault();
+        }
+    },
+
+    // Check if storage exists
+    exists() {
+        return localStorage.getItem(this.KEYS.USER_DATA) !== null;
+    },
+
+    // Create default storage structure
+    createDefault() {
+        const defaultData = {
+            createdAt: new Date().toISOString(),
+            lastVisit: new Date().toISOString(),
+            onboardingComplete: false
+        };
+
+        const defaultPrimer = {
+            name: '',
+            intro: '',
+            themes: [],
+            themesOther: '',
+            style: [],
+            communication: '',
+            goals: '',
+            selectedAI: '',
+            createdAt: null,
+            updatedAt: null
+        };
+
+        const defaultSessions = [];
+
+        const defaultSettings = {
+            showCrisisBanner: true
+        };
+
+        localStorage.setItem(this.KEYS.USER_DATA, JSON.stringify(defaultData));
+        localStorage.setItem(this.KEYS.PRIMER, JSON.stringify(defaultPrimer));
+        localStorage.setItem(this.KEYS.SESSIONS, JSON.stringify(defaultSessions));
+        localStorage.setItem(this.KEYS.SETTINGS, JSON.stringify(defaultSettings));
+    },
+
+    // Get user data
+    getUserData() {
+        const data = localStorage.getItem(this.KEYS.USER_DATA);
+        return data ? JSON.parse(data) : null;
+    },
+
+    // Update user data
+    updateUserData(updates) {
+        const current = this.getUserData() || {};
+        const updated = { ...current, ...updates, lastVisit: new Date().toISOString() };
+        localStorage.setItem(this.KEYS.USER_DATA, JSON.stringify(updated));
+        return updated;
+    },
+
+    // Get primer
+    getPrimer() {
+        const data = localStorage.getItem(this.KEYS.PRIMER);
+        return data ? JSON.parse(data) : null;
+    },
+
+    // Save primer
+    savePrimer(primer) {
+        const current = this.getPrimer() || {};
+        const updated = {
+            ...current,
+            ...primer,
+            updatedAt: new Date().toISOString()
+        };
+
+        if (!updated.createdAt) {
+            updated.createdAt = new Date().toISOString();
+        }
+
+        localStorage.setItem(this.KEYS.PRIMER, JSON.stringify(updated));
+        return updated;
+    },
+
+    // Generate formatted primer text
+    generatePrimerText() {
+        const primer = this.getPrimer();
+        if (!primer || !primer.name) return '';
+
+        let text = '# MAGIE Primer\n\n';
+
+        // Name
+        text += `**Name:** ${primer.name}\n\n`;
+
+        // Date
+        text += `**Created:** ${new Date(primer.createdAt).toLocaleDateString()}\n`;
+        text += `**Last Updated:** ${new Date(primer.updatedAt).toLocaleDateString()}\n\n`;
+
+        // Introduction
+        text += `## Who I Am\n\n${primer.intro}\n\n`;
+
+        // Themes
+        text += `## What I'm Working On\n\n`;
+        if (primer.themes && primer.themes.length > 0) {
+            text += `**Emotional Themes:** ${primer.themes.join(', ')}\n\n`;
+        }
+        if (primer.themesOther) {
+            text += `${primer.themesOther}\n\n`;
+        }
+
+        // Style
+        text += `## How I Want To Be Met\n\n`;
+        if (primer.style && primer.style.length > 0) {
+            text += `**Preferred Communication Style:** ${primer.style.join(', ')}\n\n`;
+        }
+        if (primer.communication) {
+            text += `**About My Communication:**\n${primer.communication}\n\n`;
+        }
+
+        // Goals
+        text += `## My Goals for MAGIE\n\n${primer.goals}\n\n`;
+
+        // Selected AI
+        if (primer.selectedAI) {
+            text += `---\n\n*Practicing with ${primer.selectedAI}*\n`;
+        }
+
+        return text;
+    },
+
+    // Get all sessions
+    getSessions() {
+        const data = localStorage.getItem(this.KEYS.SESSIONS);
+        return data ? JSON.parse(data) : [];
+    },
+
+    // Add session
+    addSession(session) {
+        const sessions = this.getSessions();
+        const newSession = {
+            id: Date.now(),
+            timestamp: new Date().toISOString(),
+            ...session
+        };
+        sessions.unshift(newSession); // Add to beginning
+        localStorage.setItem(this.KEYS.SESSIONS, JSON.stringify(sessions));
+        return newSession;
+    },
+
+    // Update session
+    updateSession(sessionId, updates) {
+        const sessions = this.getSessions();
+        const index = sessions.findIndex(s => s.id === sessionId);
+        if (index !== -1) {
+            sessions[index] = { ...sessions[index], ...updates };
+            localStorage.setItem(this.KEYS.SESSIONS, JSON.stringify(sessions));
+            return sessions[index];
+        }
+        return null;
+    },
+
+    // Get session count
+    getSessionCount() {
+        return this.getSessions().length;
+    },
+
+    // Get days practicing (from first session or primer creation)
+    getDaysPracticing() {
+        const primer = this.getPrimer();
+        const sessions = this.getSessions();
+
+        let startDate = null;
+
+        if (primer && primer.createdAt) {
+            startDate = new Date(primer.createdAt);
+        }
+
+        if (sessions.length > 0) {
+            const firstSession = sessions[sessions.length - 1];
+            const firstSessionDate = new Date(firstSession.timestamp);
+            if (!startDate || firstSessionDate < startDate) {
+                startDate = firstSessionDate;
+            }
+        }
+
+        if (!startDate) return 0;
+
+        const today = new Date();
+        const diffTime = Math.abs(today - startDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    },
+
+    // Get settings
+    getSettings() {
+        const data = localStorage.getItem(this.KEYS.SETTINGS);
+        return data ? JSON.parse(data) : { showCrisisBanner: true };
+    },
+
+    // Update settings
+    updateSettings(updates) {
+        const current = this.getSettings();
+        const updated = { ...current, ...updates };
+        localStorage.setItem(this.KEYS.SETTINGS, JSON.stringify(updated));
+        return updated;
+    },
+
+    // Export all data
+    exportAll() {
+        return {
+            userData: this.getUserData(),
+            primer: this.getPrimer(),
+            sessions: this.getSessions(),
+            settings: this.getSettings(),
+            exportedAt: new Date().toISOString()
+        };
+    },
+
+    // Import data
+    importData(data) {
+        if (data.userData) {
+            localStorage.setItem(this.KEYS.USER_DATA, JSON.stringify(data.userData));
+        }
+        if (data.primer) {
+            localStorage.setItem(this.KEYS.PRIMER, JSON.stringify(data.primer));
+        }
+        if (data.sessions) {
+            localStorage.setItem(this.KEYS.SESSIONS, JSON.stringify(data.sessions));
+        }
+        if (data.settings) {
+            localStorage.setItem(this.KEYS.SETTINGS, JSON.stringify(data.settings));
+        }
+    },
+
+    // Clear all data
+    clearAll() {
+        Object.values(this.KEYS).forEach(key => {
+            localStorage.removeItem(key);
+        });
+    },
+
+    // Check if onboarding is complete
+    isOnboardingComplete() {
+        const userData = this.getUserData();
+        return userData && userData.onboardingComplete === true;
+    },
+
+    // Mark onboarding complete
+    completeOnboarding() {
+        this.updateUserData({ onboardingComplete: true });
+    },
+
+    // Check if primer exists
+    hasPrimer() {
+        const primer = this.getPrimer();
+        return primer && primer.name && primer.intro;
+    },
+
+    /* ===== Supabase Sync Functions ===== */
+
+    // Save primer to Supabase
+    async syncPrimerToSupabase(primer) {
+        if (!supabase || !currentUser) return;
+
+        try {
+            // Check if primer exists
+            const { data: existing } = await supabase
+                .from('primers')
+                .select('id')
+                .eq('user_id', currentUser.id)
+                .single();
+
+            const primerData = {
+                user_id: currentUser.id,
+                name: primer.name,
+                intro: primer.intro,
+                themes: primer.themes || [],
+                themes_other: primer.themesOther || '',
+                style: primer.style || [],
+                communication: primer.communication || '',
+                goals: primer.goals || '',
+                selected_ai: primer.selectedAI || '',
+                updated_at: new Date().toISOString()
+            };
+
+            if (existing) {
+                // Update existing primer
+                const { error } = await supabase
+                    .from('primers')
+                    .update(primerData)
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+            } else {
+                // Insert new primer
+                primerData.created_at = new Date().toISOString();
+                const { error } = await supabase
+                    .from('primers')
+                    .insert([primerData]);
+
+                if (error) throw error;
+            }
+
+            console.log('Primer synced to Supabase');
+        } catch (error) {
+            console.error('Error syncing primer:', error);
+        }
+    },
+
+    // Load primer from Supabase
+    async loadPrimerFromSupabase() {
+        if (!supabase || !currentUser) return null;
+
+        try {
+            const { data, error } = await supabase
+                .from('primers')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .single();
+
+            if (error) {
+                if (error.code === 'PGRST116') {
+                    // No primer found, return null
+                    return null;
+                }
+                throw error;
+            }
+
+            // Convert to local format
+            const primer = {
+                name: data.name,
+                intro: data.intro,
+                themes: data.themes || [],
+                themesOther: data.themes_other,
+                style: data.style || [],
+                communication: data.communication,
+                goals: data.goals,
+                selectedAI: data.selected_ai,
+                createdAt: data.created_at,
+                updatedAt: data.updated_at
+            };
+
+            // Save to localStorage
+            localStorage.setItem(this.KEYS.PRIMER, JSON.stringify(primer));
+            return primer;
+        } catch (error) {
+            console.error('Error loading primer:', error);
+            return null;
+        }
+    },
+
+    // Sync session to Supabase
+    async syncSessionToSupabase(session) {
+        if (!supabase || !currentUser) return;
+
+        try {
+            const sessionData = {
+                user_id: currentUser.id,
+                session_type: session.type,
+                note: session.note,
+                created_at: session.timestamp
+            };
+
+            const { error } = await supabase
+                .from('sessions')
+                .insert([sessionData]);
+
+            if (error) throw error;
+
+            console.log('Session synced to Supabase');
+        } catch (error) {
+            console.error('Error syncing session:', error);
+        }
+    },
+
+    // Load sessions from Supabase
+    async loadSessionsFromSupabase() {
+        if (!supabase || !currentUser) return [];
+
+        try {
+            const { data, error } = await supabase
+                .from('sessions')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            // Convert to local format
+            const sessions = data.map(s => ({
+                id: s.id,
+                type: s.session_type,
+                note: s.note,
+                timestamp: s.created_at
+            }));
+
+            // Save to localStorage
+            localStorage.setItem(this.KEYS.SESSIONS, JSON.stringify(sessions));
+            return sessions;
+        } catch (error) {
+            console.error('Error loading sessions:', error);
+            return [];
+        }
+    },
+
+    // Sync settings to Supabase
+    async syncSettingsToSupabase(settings) {
+        if (!supabase || !currentUser) return;
+
+        try {
+            const { data: existing } = await supabase
+                .from('user_settings')
+                .select('id')
+                .eq('user_id', currentUser.id)
+                .single();
+
+            const settingsData = {
+                user_id: currentUser.id,
+                show_crisis_banner: settings.showCrisisBanner,
+                onboarding_complete: true,
+                user_name: settings.userName || null,
+                pronouns: settings.pronouns || null,
+                updated_at: new Date().toISOString()
+            };
+
+            if (existing) {
+                const { error } = await supabase
+                    .from('user_settings')
+                    .update(settingsData)
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+            } else {
+                settingsData.created_at = new Date().toISOString();
+                const { error } = await supabase
+                    .from('user_settings')
+                    .insert([settingsData]);
+
+                if (error) throw error;
+            }
+
+            console.log('Settings synced to Supabase');
+        } catch (error) {
+            console.error('Error syncing settings:', error);
+        }
+    },
+
+    // Load settings from Supabase
+    async loadSettingsFromSupabase() {
+        if (!supabase || !currentUser) return null;
+
+        try {
+            const { data, error } = await supabase
+                .from('user_settings')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .single();
+
+            if (error) {
+                if (error.code === 'PGRST116') {
+                    return null;
+                }
+                throw error;
+            }
+
+            const settings = {
+                showCrisisBanner: data.show_crisis_banner,
+                onboardingComplete: data.onboarding_complete,
+                userName: data.user_name || '',
+                pronouns: data.pronouns || ''
+            };
+
+            localStorage.setItem(this.KEYS.SETTINGS, JSON.stringify(settings));
+            return settings;
+        } catch (error) {
+            console.error('Error loading settings:', error);
+            return null;
+        }
+    }
+};
+
+// Initialize on load
+MAGIE_Storage.init();
+
+/* ===== Load User Data from Supabase ===== */
+
+async function loadUserDataFromSupabase() {
+    if (!supabase || !currentUser) return;
+
+    console.log('Loading user data from Supabase...');
+
+    // Load all user data
+    await Promise.all([
+        MAGIE_Storage.loadPrimerFromSupabase(),
+        MAGIE_Storage.loadSessionsFromSupabase(),
+        MAGIE_Storage.loadSettingsFromSupabase()
+    ]);
+
+    // Update user data
+    MAGIE_Storage.updateUserData({
+        onboardingComplete: true
+    });
+
+    console.log('User data loaded from Supabase');
+}
+
+</script>
+    <script>
 /* ===== MAGIE Companion - Main Application ===== */
 
 // Initialize app on page load
-document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
+document.addEventListener('DOMContentLoaded', async function() {
+    await initializeApp();
 });
 
-function initializeApp() {
-    // Check if returning user
-    if (MAGIE_Storage.isOnboardingComplete() && MAGIE_Storage.hasPrimer()) {
-        showDashboard();
+async function initializeApp() {
+    // Initialize Supabase
+    const supabaseInitialized = initSupabase();
+
+    if (supabaseInitialized) {
+        // Set up auth listener
+        setupAuthListener();
+
+        // Check for email confirmation or other auth callbacks in URL
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const type = hashParams.get('type');
+
+        // If this is an email confirmation callback, show success message
+        if (accessToken && type === 'signup') {
+            // Clean up the URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+
+            // Show success message
+            setTimeout(() => {
+                showToast('✓ Email confirmed! Welcome to MAGIE.');
+            }, 500);
+        }
+        // Check for password reset in URL
+        await checkForPasswordReset();
+
+        // Check if user is already signed in
+        const user = await checkAuth();
+
+        if (user) {
+            // Load user data from Supabase
+            await loadUserDataFromSupabase();
+
+            // Check if they have a primer
+            if (MAGIE_Storage.hasPrimer()) {
+                showDashboard();
+            } else {
+                showView('view-landing');
+            }
+        } else {
+            // Not signed in, show landing page
+            showView('view-landing');
+        }
     } else {
-        showView('view-landing');
+        // Supabase not configured, use localStorage only
+        if (MAGIE_Storage.isOnboardingComplete() && MAGIE_Storage.hasPrimer()) {
+            showDashboard();
+        } else {
+            showView('view-landing');
+        }
     }
 
     // Set up event listeners
@@ -51,6 +950,14 @@ function showView(viewId) {
         targetView.classList.add('active');
         window.scrollTo(0, 0);
     }
+
+    // Show dashboard link on about page if user is logged in
+    if (viewId === 'view-about') {
+        const dashboardLink = document.getElementById('dashboard-link-about');
+        if (dashboardLink && currentUser) {
+            dashboardLink.style.display = 'inline-block';
+        }
+    }
 }
 
 function nextStep(viewId) {
@@ -58,7 +965,36 @@ function nextStep(viewId) {
 }
 
 function startJourney() {
-    showView('view-welcome');
+    // If Supabase is configured and user not signed in, show auth modal
+    if (supabase && !currentUser) {
+        showAuthModal();
+        // Switch to sign up tab
+        const signupTab = document.querySelector('.auth-tab:nth-child(2)');
+        if (signupTab) signupTab.click();
+    } else {
+        showView('view-welcome');
+    }
+}
+
+function handleReturningUser() {
+    // If Supabase is configured, show sign in modal
+    if (supabase) {
+        if (currentUser) {
+            // Already signed in, go to dashboard
+            showDashboard();
+        } else {
+            // Show sign in modal
+            showAuthModal();
+        }
+    } else {
+        // No Supabase, use localStorage
+        if (MAGIE_Storage.hasPrimer()) {
+            showDashboard();
+        } else {
+            alert('No saved data found. Please start a new journey.');
+            showView('view-landing');
+        }
+    }
 }
 
 // ===== ASSESSMENT =====
@@ -115,6 +1051,10 @@ function selectAI(aiName) {
         'claude': 'Claude',
         'chatgpt': 'ChatGPT',
         'gemini': 'Gemini',
+        'gemini-studio': 'Gemini (AI Studio)',
+        'grok': 'Grok',
+        'copilot': 'Copilot',
+        'mistral': 'Mistral',
         'other': 'Other/Undecided'
     };
 
@@ -132,13 +1072,21 @@ function selectAI(aiName) {
     event.target.closest('.ai-card').style.borderColor = 'var(--primary-color)';
     event.target.closest('.ai-card').style.borderWidth = '2px';
     event.target.closest('.ai-card').style.borderStyle = 'solid';
+
+    // Scroll to the "Ready - Build My Primer" button
+    setTimeout(() => {
+        const buildButton = document.getElementById('build-primer-btn');
+        if (buildButton) {
+            buildButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100); // Small delay to ensure the button is visible first
 }
 
 // ===== PRIMER WIZARD =====
 
-function nextPrimerSection(sectionName) {
+async function nextPrimerSection(sectionName) {
     // Save current section data first
-    saveCurrentPrimerSection();
+    await saveCurrentPrimerSection();
 
     // Hide all sections
     document.querySelectorAll('.primer-section').forEach(section => {
@@ -167,7 +1115,7 @@ function prevPrimerSection(sectionName) {
     nextPrimerSection(sectionName); // Same function, just going backwards
 }
 
-function saveCurrentPrimerSection() {
+async function saveCurrentPrimerSection() {
     const activeSection = document.querySelector('.primer-section.active');
     if (!activeSection) return;
 
@@ -197,7 +1145,12 @@ function saveCurrentPrimerSection() {
             break;
     }
 
-    MAGIE_Storage.savePrimer(updates);
+    const updatedPrimer = MAGIE_Storage.savePrimer(updates);
+
+    // Sync to Supabase if available
+    if (supabase && currentUser) {
+        await MAGIE_Storage.syncPrimerToSupabase(updatedPrimer);
+    }
 }
 
 function loadPrimerData() {
@@ -234,9 +1187,18 @@ function loadPrimerData() {
     if (primer.goals) document.getElementById('primer-goals').value = primer.goals;
 }
 
-function completePrimer() {
+async function completePrimer() {
     // Save final section
     saveCurrentPrimerSection();
+
+    // Get the saved primer
+    const primer = MAGIE_Storage.getPrimer();
+
+    // Sync to Supabase if available
+    if (supabase && currentUser) {
+        await MAGIE_Storage.syncPrimerToSupabase(primer);
+        await MAGIE_Storage.syncSettingsToSupabase({ showCrisisBanner: true });
+    }
 
     // Generate and display primer
     const primerText = MAGIE_Storage.generatePrimerText();
@@ -295,8 +1257,12 @@ function setupFirstSession() {
         // Set platform link
         const platformLinks = {
             'Claude': '<a href="https://claude.ai" target="_blank">claude.ai →</a>',
-            'ChatGPT': '<a href="https://chat.openai.com" target="_blank">chat.openai.com →</a>',
+            'ChatGPT': '<a href="https://chatgpt.com" target="_blank">chatgpt.com →</a>',
             'Gemini': '<a href="https://gemini.google.com" target="_blank">gemini.google.com →</a>',
+            'Gemini (AI Studio)': '<a href="https://aistudio.google.com" target="_blank">aistudio.google.com →</a>',
+            'Grok': '<a href="https://x.com/i/grok" target="_blank">x.com/i/grok →</a>',
+            'Copilot': '<a href="https://copilot.microsoft.com" target="_blank">copilot.microsoft.com →</a>',
+            'Mistral': '<a href="https://chat.mistral.ai" target="_blank">chat.mistral.ai →</a>',
             'Other/Undecided': 'Open your chosen AI platform'
         };
 
@@ -328,20 +1294,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function showDashboard() {
     const primer = MAGIE_Storage.getPrimer();
+    const settings = MAGIE_Storage.getSettings();
     const sessionCount = MAGIE_Storage.getSessionCount();
     const daysPracticing = MAGIE_Storage.getDaysPracticing();
 
-    // Update dashboard data
-    if (primer && primer.name) {
-        document.getElementById('dashboard-name').textContent = primer.name;
-    }
+    // Update dashboard data - prefer userName from settings, fall back to primer name
+    const displayName = settings.userName || (primer && primer.name) || 'Friend';
+    document.getElementById('dashboard-name').textContent = displayName;
+
     document.getElementById('total-sessions').textContent = sessionCount;
     document.getElementById('days-practicing').textContent = daysPracticing;
+
+    // Show sign-out button if user is signed in
+    const signOutBtn = document.getElementById('sign-out-btn');
+    if (signOutBtn && supabase && currentUser) {
+        signOutBtn.style.display = 'inline-block';
+    }
 
     showView('view-dashboard');
 }
 
-function startSession() {
+async function startSession() {
     // Load primer data if editing
     loadPrimerData();
 
@@ -353,10 +1326,15 @@ function startSession() {
         showView('view-first-session');
 
         // Log session start
-        MAGIE_Storage.addSession({
+        const session = MAGIE_Storage.addSession({
             type: 'session',
             note: 'Session started'
         });
+
+        // Sync to Supabase if available
+        if (supabase && currentUser) {
+            await MAGIE_Storage.syncSessionToSupabase(session);
+        }
     }
 }
 
@@ -379,9 +1357,133 @@ function showJourney() {
     alert('Journey tracking coming soon!\n\nThis will show:\n\n• Session history\n• Emotional themes over time\n• Your saved insights\n• Progress markers');
 }
 
+// ===== ACCOUNT SETTINGS =====
+
+async function showAccountSettings() {
+    // Load user profile data
+    if (currentUser) {
+        document.getElementById('account-email').value = currentUser.email;
+
+        // Load name and pronouns from settings
+        const settings = MAGIE_Storage.getSettings();
+        if (settings.userName) {
+            document.getElementById('account-name').value = settings.userName;
+        }
+        if (settings.pronouns) {
+            document.getElementById('account-pronouns').value = settings.pronouns;
+        }
+    }
+
+    showView('view-account-settings');
+}
+
+async function saveAccountProfile() {
+    const name = document.getElementById('account-name').value;
+    const pronouns = document.getElementById('account-pronouns').value;
+
+    // Save to local storage
+    MAGIE_Storage.updateSettings({
+        userName: name,
+        pronouns: pronouns
+    });
+
+    // Save to Supabase if available
+    if (supabase && currentUser) {
+        await MAGIE_Storage.syncSettingsToSupabase({
+            userName: name,
+            pronouns: pronouns,
+            showCrisisBanner: MAGIE_Storage.getSettings().showCrisisBanner
+        });
+    }
+
+    // Update the dashboard name
+    if (name) {
+        document.getElementById('dashboard-name').textContent = name;
+    }
+
+    showToast('✓ Profile updated!');
+}
+
+function showChangePasswordForm() {
+    document.getElementById('change-password-section').style.display = 'none';
+    document.getElementById('change-password-form').style.display = 'block';
+    // Clear any previous messages
+    document.getElementById('password-change-error').classList.add('hidden');
+    document.getElementById('password-change-success').classList.add('hidden');
+}
+
+function hideChangePasswordForm() {
+    document.getElementById('change-password-section').style.display = 'block';
+    document.getElementById('change-password-form').style.display = 'none';
+    // Clear form
+    document.getElementById('current-password').value = '';
+    document.getElementById('new-password-change').value = '';
+    document.getElementById('new-password-change-confirm').value = '';
+}
+
+async function handleChangePassword(event) {
+    event.preventDefault();
+
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password-change').value;
+    const confirmPassword = document.getElementById('new-password-change-confirm').value;
+
+    // Clear previous messages
+    document.getElementById('password-change-error').classList.add('hidden');
+    document.getElementById('password-change-success').classList.add('hidden');
+
+    if (newPassword !== confirmPassword) {
+        const errorEl = document.getElementById('password-change-error');
+        errorEl.textContent = 'Passwords do not match';
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    if (!supabase) {
+        const errorEl = document.getElementById('password-change-error');
+        errorEl.textContent = 'Authentication not available';
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    try {
+        // First verify current password by attempting to sign in
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: currentUser.email,
+            password: currentPassword
+        });
+
+        if (signInError) {
+            throw new Error('Current password is incorrect');
+        }
+
+        // Update to new password
+        const { error: updateError } = await supabase.auth.updateUser({
+            password: newPassword
+        });
+
+        if (updateError) throw updateError;
+
+        const successEl = document.getElementById('password-change-success');
+        successEl.textContent = 'Password updated successfully!';
+        successEl.classList.remove('hidden');
+
+        // Clear and hide form after success
+        setTimeout(() => {
+            hideChangePasswordForm();
+        }, 2000);
+
+    } catch (error) {
+        const errorEl = document.getElementById('password-change-error');
+        errorEl.textContent = error.message;
+        errorEl.classList.remove('hidden');
+    }
+}
+
 // ===== BREATHING EXERCISE =====
 
 let breathingInterval = null;
+let breathingPhaseInterval = null;
 let breathingCycle = 0;
 
 function startBreathing() {
@@ -403,30 +1505,92 @@ function startBreathing() {
 function updateBreathingCycle() {
     document.getElementById('breath-count').textContent = breathingCycle + 1;
 
-    // Alternate instruction
     const instruction = document.getElementById('breath-instruction');
+    const timer = document.getElementById('breath-timer');
+    const circle = document.querySelector('.breathing-circle');
     let phase = 0;
+    let countdown = 2;
 
-    const breathePhases = setInterval(() => {
+    // Clear any existing phase interval
+    if (breathingPhaseInterval) {
+        clearInterval(breathingPhaseInterval);
+    }
+
+    // Helper function to update countdown every second
+    let countdownInterval;
+    function startCountdown() {
+        countdown = 2;
+        timer.textContent = countdown;
+
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+        }
+
+        countdownInterval = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+                timer.textContent = countdown;
+            }
+        }, 1000);
+    }
+
+    // Start with breathe in
+    instruction.textContent = 'Breathe In';
+    circle.classList.remove('exhale', 'hold');
+    circle.classList.add('inhale');
+    startCountdown();
+
+    breathingPhaseInterval = setInterval(() => {
         phase++;
         if (phase === 1) {
-            instruction.textContent = 'Breathe In';
+            // Hold after inhale
+            instruction.textContent = 'Hold';
+            circle.classList.remove('inhale', 'exhale');
+            circle.classList.add('hold');
+            startCountdown();
         } else if (phase === 2) {
-            instruction.textContent = 'Hold';
-        } else if (phase === 3) {
+            // Breathe out
             instruction.textContent = 'Breathe Out';
-        } else if (phase === 4) {
+            circle.classList.remove('inhale', 'hold');
+            circle.classList.add('exhale');
+            startCountdown();
+        } else if (phase === 3) {
+            // Hold after exhale
             instruction.textContent = 'Hold';
-            clearInterval(breathePhases);
+            circle.classList.remove('inhale', 'exhale');
+            circle.classList.add('hold');
+            startCountdown();
+
+            // Clean up
+            setTimeout(() => {
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                }
+            }, 2000);
+
+            clearInterval(breathingPhaseInterval);
+            breathingPhaseInterval = null;
         }
     }, 2000);
 }
 
 function closeBreathing() {
     document.getElementById('breathing-modal').classList.add('hidden');
+
+    // Clear all intervals
     if (breathingInterval) {
         clearInterval(breathingInterval);
         breathingInterval = null;
+    }
+    if (breathingPhaseInterval) {
+        clearInterval(breathingPhaseInterval);
+        breathingPhaseInterval = null;
+    }
+
+    // Reset circle classes
+    const circle = document.querySelector('.breathing-circle');
+    if (circle) {
+        circle.classList.remove('inhale', 'exhale', 'hold');
     }
 }
 
@@ -519,3 +1683,4 @@ window.MAGIE_Debug = {
 };
 
 console.log('MAGIE Companion loaded. Debug tools available at window.MAGIE_Debug');
+

@@ -54,8 +54,9 @@ The app sits *alongside* their chosen AI platform (Claude, ChatGPT, Gemini, etc.
 - **CSS3** - Custom styles, CSS Grid, Flexbox
 - **Vanilla JavaScript** - No frameworks needed
 - **localStorage API** - Client-side data persistence
+- **Optional Supabase Sync** - Configure via `config.js` for cloud backups
 
-No build process required. No dependencies. Just open `index.html` and it works.
+No build process required for the app itself—just open `index.html` and it works. Development tooling (lint/smoke checks) is available via npm.
 
 ---
 
@@ -63,14 +64,13 @@ No build process required. No dependencies. Just open `index.html` and it works.
 
 ```
 project-MAGIE/
-├── index.html          # Main application file (all views)
-├── css/
-│   └── style.css       # All styling
-├── js/
-│   ├── storage.js      # localStorage management
-│   └── app.js          # Application logic & navigation
-├── user-flow.md        # Complete user journey documentation
-└── README.md           # This file
+├── index.html          # Main application shell
+├── style.css           # Styling for all views
+├── app.js              # Application logic & Supabase integration
+├── config.example.js   # Template for runtime Supabase credentials
+├── scripts/smoke.js    # Lightweight structural smoke test
+├── README.md           # This file
+└── user-flow.md        # Complete user journey documentation
 ```
 
 ---
@@ -86,6 +86,21 @@ The app will:
 - Guide users through onboarding
 - Save progress automatically as they work
 - Remember returning users
+
+### Configure Supabase (optional)
+
+1. Copy `config.example.js` to `config.js`
+2. Fill in your `supabaseUrl` and `supabaseAnonKey`
+3. Reload the app. The cloud status banner will confirm whether sync is active or if the app is operating in local-only mode.
+
+> Note: `config.js` is ignored by git so credentials are never committed by accident.
+
+### Run quality checks (optional)
+
+```bash
+npm install
+npm test   # runs ESLint and a structural smoke test
+```
 
 ### Debug Tools
 
