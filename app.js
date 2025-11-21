@@ -1452,12 +1452,12 @@ function renderCalendar() {
     // Calendar days
     for (let day = 1; day <= daysInMonth; day++) {
         const hasSessions = sessionsByDate[day] && sessionsByDate[day].length > 0;
-        const hasNotes = hasSessions && sessionsByDate[day].some(s => s.note);
+        const hasNotes = hasSessions && sessionsByDate[day].some(s => s.note && s.note !== 'Session started');
         const isToday = new Date().getDate() === day &&
                        new Date().getMonth() === month &&
                        new Date().getFullYear() === year;
 
-        let cellStyle = 'padding: 1rem; text-align: center; border-radius: var(--radius-md); cursor: pointer; position: relative; transition: var(--transition);';
+        let cellStyle = 'padding: 1rem; text-align: center; border-radius: var(--radius-md); position: relative; transition: var(--transition);';
 
         if (isToday) {
             cellStyle += 'border: 2px solid var(--primary-color);';
@@ -1466,7 +1466,7 @@ function renderCalendar() {
         }
 
         if (hasSessions) {
-            cellStyle += 'background-color: var(--bg-light);';
+            cellStyle += 'background-color: var(--bg-light); cursor: pointer;';
         }
 
         let cellContent = `<div>${day}</div>`;
@@ -1480,13 +1480,27 @@ function renderCalendar() {
             cellContent += '</div>';
         }
 
-        const onclick = hasSessions ? `onclick="displaySessionNotes(${year}, ${month}, ${day})"` : '';
-        calendarHTML += `<div ${onclick} style="${cellStyle}" ${hasSessions ? 'onmouseover="this.style.backgroundColor=\'var(--bg-gray)\'" onmouseout="this.style.backgroundColor=\'var(--bg-light)\'"' : ''}>${cellContent}</div>`;
+        const hoverStyle = hasSessions ? 'onmouseover="this.style.backgroundColor=\'var(--bg-gray)\'" onmouseout="this.style.backgroundColor=\'var(--bg-light)\'"' : '';
+        const dataAttr = hasSessions ? `data-date="${year}-${month}-${day}"` : '';
+        const clickClass = hasSessions ? 'calendar-day-clickable' : '';
+
+        calendarHTML += `<div class="${clickClass}" ${dataAttr} style="${cellStyle}" ${hoverStyle}>${cellContent}</div>`;
     }
 
     calendarHTML += '</div>';
 
     document.getElementById('calendar-container').innerHTML = calendarHTML;
+
+    // Add click event listeners to calendar days
+    document.querySelectorAll('.calendar-day-clickable').forEach(cell => {
+        cell.addEventListener('click', function() {
+            const dateStr = this.getAttribute('data-date').split('-');
+            const year = parseInt(dateStr[0]);
+            const month = parseInt(dateStr[1]);
+            const day = parseInt(dateStr[2]);
+            displaySessionNotes(year, month, day);
+        });
+    });
 
     // Hide notes display
     document.getElementById('session-notes-display').style.display = 'none';
@@ -1511,7 +1525,28 @@ function displaySessionNotes(year, month, day) {
                sessionDate.getDate() === day;
     });
 
-    if (daySessions.length === 0) return;
+    // Filter out auto-generated "Session started" notes - only show meaningful content
+    const meaningfulSessions = daySessions.filter(s => {
+        if (!s.note) return false;
+        if (s.note === 'Session started') return false;
+        return true;
+    });
+
+    if (meaningfulSessions.length === 0) {
+        // Show session count but no notes
+        const notesDisplay = document.getElementById('session-notes-display');
+        notesDisplay.style.display = 'block';
+
+        const date = new Date(year, month, day);
+        const dateStr = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('notes-date').textContent = dateStr;
+
+        const sessionCount = daySessions.length;
+        document.getElementById('notes-content').textContent = `${sessionCount} session${sessionCount > 1 ? 's' : ''} logged on this day.\n\nNo notes were saved for ${sessionCount > 1 ? 'these sessions' : 'this session'}. Consider adding reflections after your next session!`;
+
+        selectedSessionId = { year, month, day };
+        return;
+    }
 
     // Show the notes display
     const notesDisplay = document.getElementById('session-notes-display');
@@ -1524,7 +1559,7 @@ function displaySessionNotes(year, month, day) {
 
     // Compile all notes for this day
     let notesHTML = '';
-    daySessions.forEach((session, index) => {
+    meaningfulSessions.forEach((session, index) => {
         const time = new Date(session.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
         const type = session.type === 'reflection' ? 'Reflection' : 'Session';
 
@@ -1532,7 +1567,7 @@ function displaySessionNotes(year, month, day) {
         if (session.note) {
             notesHTML += session.note + '\n';
         }
-        if (index < daySessions.length - 1) {
+        if (index < meaningfulSessions.length - 1) {
             notesHTML += '\n---\n\n';
         }
     });
@@ -1555,7 +1590,13 @@ function exportSessionNote() {
                sessionDate.getDate() === day;
     });
 
-    if (daySessions.length === 0) return;
+    // Filter out auto-generated notes
+    const meaningfulSessions = daySessions.filter(s => s.note && s.note !== 'Session started');
+
+    if (meaningfulSessions.length === 0) {
+        alert('No notes to export for this day.');
+        return;
+    }
 
     const date = new Date(year, month, day);
     const dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
@@ -1563,16 +1604,14 @@ function exportSessionNote() {
     let content = `MAGIE Session Notes - ${date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n`;
     content += '='.repeat(80) + '\n\n';
 
-    daySessions.forEach((session, index) => {
+    meaningfulSessions.forEach((session, index) => {
         const time = new Date(session.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
         const type = session.type === 'reflection' ? 'Reflection' : 'Session';
 
         content += `${time} - ${type}\n`;
         content += '-'.repeat(80) + '\n';
-        if (session.note) {
-            content += session.note + '\n';
-        }
-        if (index < daySessions.length - 1) {
+        content += session.note + '\n';
+        if (index < meaningfulSessions.length - 1) {
             content += '\n';
         }
     });
@@ -1583,15 +1622,18 @@ function exportSessionNote() {
 function exportAllNotes() {
     const sessions = MAGIE_Storage.getSessions();
 
-    if (sessions.length === 0) {
-        alert('No sessions to export yet!');
+    // Filter out auto-generated "Session started" notes
+    const meaningfulSessions = sessions.filter(s => s.note && s.note !== 'Session started');
+
+    if (meaningfulSessions.length === 0) {
+        alert('No notes to export yet! Add reflections after your sessions to build your journey history.');
         return;
     }
 
     let content = 'MAGIE Journey - All Sessions and Reflections\n';
     content += '='.repeat(80) + '\n\n';
 
-    sessions.forEach((session, index) => {
+    meaningfulSessions.forEach((session, index) => {
         const date = new Date(session.timestamp);
         const dateStr = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
@@ -1599,10 +1641,8 @@ function exportAllNotes() {
 
         content += `${dateStr} at ${time} - ${type}\n`;
         content += '-'.repeat(80) + '\n';
-        if (session.note) {
-            content += session.note + '\n';
-        }
-        if (index < sessions.length - 1) {
+        content += session.note + '\n';
+        if (index < meaningfulSessions.length - 1) {
             content += '\n\n';
         }
     });
