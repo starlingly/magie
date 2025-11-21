@@ -949,6 +949,16 @@ function showView(viewId) {
         window.scrollTo(0, 0);
     }
 
+    // Hide cloud status on landing page, show on all other views
+    const cloudStatus = document.getElementById('cloud-status');
+    if (cloudStatus) {
+        if (viewId === 'view-landing') {
+            cloudStatus.classList.add('hidden');
+        } else {
+            cloudStatus.classList.remove('hidden');
+        }
+    }
+
     // Show dashboard link on about page if user is logged in
     if (viewId === 'view-about') {
         const dashboardLink = document.getElementById('dashboard-link-about');
