@@ -731,6 +731,7 @@ const MAGIE_Storage = {
                 id: s.id,
                 type: s.session_type,
                 note: s.note,
+                reflection: s.reflection,
                 timestamp: s.created_at
             }));
 
@@ -1559,7 +1560,7 @@ function cancelReflectionEdit() {
 
 let isSavingReflection = false;
 
-function saveReflection() {
+async function saveReflection() {
     // Prevent duplicate saves
     if (isSavingReflection) return;
     isSavingReflection = true;
@@ -1606,9 +1607,9 @@ function saveReflection() {
         });
     }
 
-    // Sync to Supabase if available
+    // Sync to Supabase if available and WAIT for it to complete
     if (supabase && currentUser) {
-        syncUserDataToSupabase();
+        await syncUserDataToSupabase();
     }
 
     // Show success toast
