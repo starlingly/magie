@@ -816,6 +816,105 @@ const MAGIE_Storage = {
             console.error('Error loading settings:', error);
             return null;
         }
+    },
+
+    // Sync sessions to Supabase
+    async syncSessionsToSupabase() {
+        if (!supabase || !currentUser) return;
+
+        try {
+            const sessions = this.getSessions();
+
+            // Save each session to Supabase
+            for (const session of sessions) {
+                // Check if session already exists
+                const { data: existing } = await supabase
+                    .from('sessions')
+                    .select('id')
+                    .eq('id', session.id)
+                    .eq('user_id', currentUser.id)
+                    .single();
+
+                const sessionData = {
+                    user_id: currentUser.id,
+                    session_type: session.type || 'session',
+                    note: session.note || '',
+                    reflection: session.reflection || null,
+                    created_at: session.timestamp,
+                    updated_at: new Date().toISOString()
+                };
+
+                if (existing) {
+                    // Update existing session
+                    const { error } = await supabase
+                        .from('sessions')
+                        .update(sessionData)
+                        .eq('id', session.id)
+                        .eq('user_id', currentUser.id);
+
+                    if (error) throw error;
+                } else {
+                    // Insert new session
+                    sessionData.id = session.id;
+                    const { error } = await supabase
+                        .from('sessions')
+                        .insert([sessionData]);
+
+                    if (error) throw error;
+                }
+            }
+
+            console.log('Sessions synced to Supabase');
+        } catch (error) {
+            console.error('Error syncing sessions:', error);
+        }
+    },
+
+    // Sync primer to Supabase
+    async syncPrimerToSupabase() {
+        if (!supabase || !currentUser) return;
+
+        try {
+            const primer = this.getPrimer();
+            if (!primer) return;
+
+            const { data: existing } = await supabase
+                .from('primers')
+                .select('id')
+                .eq('user_id', currentUser.id)
+                .single();
+
+            const primerData = {
+                user_id: currentUser.id,
+                name: primer.name || '',
+                pronouns: primer.pronouns || '',
+                background: primer.background || '',
+                goals: primer.goals || '',
+                themes: primer.themes || '',
+                style: primer.style || '',
+                updated_at: new Date().toISOString()
+            };
+
+            if (existing) {
+                const { error } = await supabase
+                    .from('primers')
+                    .update(primerData)
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+            } else {
+                primerData.created_at = new Date().toISOString();
+                const { error } = await supabase
+                    .from('primers')
+                    .insert([primerData]);
+
+                if (error) throw error;
+            }
+
+            console.log('Primer synced to Supabase');
+        } catch (error) {
+            console.error('Error syncing primer:', error);
+        }
     }
 };
 
@@ -842,6 +941,23 @@ async function loadUserDataFromSupabase() {
     });
 
     console.log('User data loaded from Supabase');
+}
+
+/* ===== Sync User Data to Supabase ===== */
+
+async function syncUserDataToSupabase() {
+    if (!supabase || !currentUser) return;
+
+    console.log('Syncing user data to Supabase...');
+
+    // Sync all user data to cloud
+    await Promise.all([
+        MAGIE_Storage.syncPrimerToSupabase(),
+        MAGIE_Storage.syncSessionsToSupabase(),
+        MAGIE_Storage.syncSettingsToSupabase(MAGIE_Storage.getSettings())
+    ]);
+
+    console.log('User data synced to Supabase');
 }
 
 /* ===== MAGIE Companion - Main Application ===== */
