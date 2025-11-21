@@ -923,7 +923,9 @@ summary {
     padding: 3rem;
     border-radius: var(--radius-lg);
     max-width: 500px;
+    max-height: 90vh;
     width: 90%;
+    overflow-y: auto;
     position: relative;
     animation: scaleIn 0.3s ease;
 }
