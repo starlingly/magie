@@ -30,7 +30,13 @@ function initSupabase() {
     }
 
     try {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true
+            }
+        });
         console.log('Supabase initialized successfully');
         setCloudStatus('success', 'Cloud sync available. Sign in to enable syncing across devices.');
         return true;
@@ -715,16 +721,25 @@ const MAGIE_Storage = {
 
     // Load sessions from Supabase
     async loadSessionsFromSupabase() {
-        if (!supabase || !currentUser) return [];
+        if (!supabase || !currentUser) {
+            console.log('Skipping session load - no supabase or user');
+            return [];
+        }
 
         try {
+            console.log('Loading sessions from Supabase...');
             const { data, error } = await supabase
                 .from('sessions')
                 .select('*')
                 .eq('user_id', currentUser.id)
                 .order('created_at', { ascending: false });
 
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase query error:', error);
+                throw error;
+            }
+
+            console.log(`Loaded ${data ? data.length : 0} sessions from Supabase`);
 
             // Convert to local format
             const sessions = data.map(s => ({
@@ -737,6 +752,7 @@ const MAGIE_Storage = {
 
             // Save to localStorage
             localStorage.setItem(this.KEYS.SESSIONS, JSON.stringify(sessions));
+            console.log(`✓ Saved ${sessions.length} sessions to localStorage`);
             return sessions;
         } catch (error) {
             console.error('Error loading sessions:', error);
@@ -821,20 +837,29 @@ const MAGIE_Storage = {
 
     // Sync sessions to Supabase
     async syncSessionsToSupabase() {
-        if (!supabase || !currentUser) return;
+        if (!supabase || !currentUser) {
+            console.log('Skipping session sync - no supabase or user');
+            return;
+        }
 
         try {
             const sessions = this.getSessions();
+            console.log(`Syncing ${sessions.length} sessions to Supabase...`);
 
             // Save each session to Supabase
             for (const session of sessions) {
                 // Check if session already exists
-                const { data: existing } = await supabase
+                const { data: existing, error: selectError } = await supabase
                     .from('sessions')
                     .select('id')
                     .eq('id', session.id)
                     .eq('user_id', currentUser.id)
                     .single();
+
+                if (selectError && selectError.code !== 'PGRST116') {
+                    // PGRST116 is "not found", which is fine
+                    console.error('Error checking existing session:', selectError);
+                }
 
                 const sessionData = {
                     user_id: currentUser.id,
@@ -847,27 +872,36 @@ const MAGIE_Storage = {
 
                 if (existing) {
                     // Update existing session
+                    console.log(`Updating session ${session.id}`);
                     const { error } = await supabase
                         .from('sessions')
                         .update(sessionData)
                         .eq('id', session.id)
                         .eq('user_id', currentUser.id);
 
-                    if (error) throw error;
+                    if (error) {
+                        console.error('Error updating session:', error);
+                        throw error;
+                    }
                 } else {
                     // Insert new session
+                    console.log(`Inserting new session ${session.id}`);
                     sessionData.id = session.id;
                     const { error } = await supabase
                         .from('sessions')
                         .insert([sessionData]);
 
-                    if (error) throw error;
+                    if (error) {
+                        console.error('Error inserting session:', error);
+                        throw error;
+                    }
                 }
             }
 
-            console.log('Sessions synced to Supabase');
+            console.log(`✓ Successfully synced ${sessions.length} sessions to Supabase`);
         } catch (error) {
             console.error('Error syncing sessions:', error);
+            throw error; // Re-throw so saveReflection can handle it
         }
     },
 
@@ -1565,65 +1599,79 @@ async function saveReflection() {
     if (isSavingReflection) return;
     isSavingReflection = true;
 
-    const landed = document.getElementById('reflection-landed').value;
-    const surprised = document.getElementById('reflection-surprised').value;
-    const primer = document.getElementById('reflection-primer').value;
-    const insights = document.getElementById('reflection-insights').value;
+    try {
+        const landed = document.getElementById('reflection-landed').value;
+        const surprised = document.getElementById('reflection-surprised').value;
+        const primer = document.getElementById('reflection-primer').value;
+        const insights = document.getElementById('reflection-insights').value;
 
-    // Check if at least one field has content
-    if (!landed && !surprised && !primer && !insights) {
-        alert('Please add at least one reflection before saving.');
-        isSavingReflection = false;
-        return;
-    }
+        // Check if at least one field has content
+        if (!landed && !surprised && !primer && !insights) {
+            alert('Please add at least one reflection before saving.');
+            isSavingReflection = false;
+            return;
+        }
 
-    // Create reflection note
-    const reflection = {
-        landed,
-        surprised,
-        primer,
-        insights,
-        timestamp: new Date().toISOString()
-    };
-
-    // Determine message first
-    const isUpdate = currentEditingSessionId !== null;
-    const successMessage = isUpdate ? '✓ Reflection updated successfully!' : '✓ Reflection saved successfully!';
-
-    if (currentEditingSessionId) {
-        // Update existing session
-        MAGIE_Storage.updateSession(currentEditingSessionId, {
-            note: formatReflectionNote(reflection),
-            reflection: reflection,
+        // Create reflection note
+        const reflection = {
+            landed,
+            surprised,
+            primer,
+            insights,
             timestamp: new Date().toISOString()
-        });
-        currentEditingSessionId = null;
-    } else {
-        // Save as new session entry
-        MAGIE_Storage.addSession({
-            type: 'reflection',
-            note: formatReflectionNote(reflection),
-            reflection: reflection
-        });
-    }
+        };
 
-    // Sync to Supabase if available and WAIT for it to complete
-    if (supabase && currentUser) {
-        await syncUserDataToSupabase();
-    }
+        // Determine message first
+        const isUpdate = currentEditingSessionId !== null;
+        const successMessage = isUpdate ? '✓ Reflection updated successfully!' : '✓ Reflection saved successfully!';
 
-    // Show success toast
-    showToast(successMessage);
+        console.log(`Saving reflection (isUpdate: ${isUpdate})...`);
 
-    // Clear form
-    document.getElementById('reflection-form').reset();
-    document.getElementById('reflection-edit-notice').style.display = 'none';
+        if (currentEditingSessionId) {
+            // Update existing session
+            MAGIE_Storage.updateSession(currentEditingSessionId, {
+                note: formatReflectionNote(reflection),
+                reflection: reflection,
+                timestamp: new Date().toISOString()
+            });
+            currentEditingSessionId = null;
+        } else {
+            // Save as new session entry
+            MAGIE_Storage.addSession({
+                type: 'reflection',
+                note: formatReflectionNote(reflection),
+                reflection: reflection
+            });
+        }
 
-    // Show success message and wait for user to see it before navigating
-    setTimeout(() => {
+        console.log('Reflection saved to localStorage');
+
+        // Sync to Supabase if available and WAIT for it to complete
+        if (supabase && currentUser) {
+            console.log('Starting Supabase sync...');
+            await syncUserDataToSupabase();
+            console.log('Supabase sync completed');
+        } else {
+            console.warn('Skipping Supabase sync - not authenticated');
+        }
+
+        // Show success toast
+        showToast(successMessage);
+
+        // Clear form
+        document.getElementById('reflection-form').reset();
+        document.getElementById('reflection-edit-notice').style.display = 'none';
+
+        // Show success message and wait for user to see it before navigating
+        setTimeout(() => {
+            isSavingReflection = false;
+            showDashboard();
+        }, 2500);
+    } catch (error) {
+        console.error('Error saving reflection:', error);
+        alert('Error saving reflection: ' + error.message);
         isSavingReflection = false;
-        showDashboard();
-    }, 2500);
+    }
 }
 
 function formatReflectionNote(reflection) {
