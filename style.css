@@ -1017,9 +1017,11 @@ summary {
     right: 2rem;
     background-color: var(--success-color);
     color: white;
-    padding: 1rem 1.5rem;
+    padding: 1.25rem 2rem;
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-lg);
+    font-size: 1.125rem;
+    font-weight: 600;
     animation: slideIn 0.3s ease;
     z-index: 3000;
 }
