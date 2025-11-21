@@ -1330,7 +1330,61 @@ async function startSession() {
 }
 
 function showReflection() {
-    alert('Reflection feature coming soon!\n\nFor now, consider:\n\n• What landed in your last session?\n• What surprised you?\n• What needs to be added to your Primer?');
+    // Clear the form
+    document.getElementById('reflection-form').reset();
+
+    // Load last session info if available
+    const sessions = MAGIE_Storage.getSessions();
+    if (sessions.length === 0) {
+        alert('No sessions recorded yet. Start your first session to begin tracking your journey!');
+        showDashboard();
+        return;
+    }
+
+    showView('view-reflection');
+}
+
+function saveReflection() {
+    const landed = document.getElementById('reflection-landed').value;
+    const surprised = document.getElementById('reflection-surprised').value;
+    const primer = document.getElementById('reflection-primer').value;
+    const insights = document.getElementById('reflection-insights').value;
+
+    // Create reflection note
+    const reflection = {
+        landed,
+        surprised,
+        primer,
+        insights,
+        timestamp: new Date().toISOString()
+    };
+
+    // Save as a session entry
+    MAGIE_Storage.addSession({
+        type: 'reflection',
+        note: formatReflectionNote(reflection),
+        reflection: reflection
+    });
+
+    // Sync to Supabase if available
+    if (supabase && currentUser) {
+        syncUserDataToSupabase();
+    }
+
+    showToast('✓ Reflection saved!');
+
+    // Clear form and return to dashboard
+    document.getElementById('reflection-form').reset();
+    setTimeout(() => showDashboard(), 1000);
+}
+
+function formatReflectionNote(reflection) {
+    let note = '';
+    if (reflection.landed) note += `What landed:\n${reflection.landed}\n\n`;
+    if (reflection.surprised) note += `What surprised me:\n${reflection.surprised}\n\n`;
+    if (reflection.primer) note += `To add to Primer:\n${reflection.primer}\n\n`;
+    if (reflection.insights) note += `Other insights:\n${reflection.insights}`;
+    return note.trim();
 }
 
 function showPrimerManager() {
@@ -1344,8 +1398,230 @@ function showPrimerManager() {
     nextPrimerSection('intro');
 }
 
+// Journey/Calendar tracking
+let currentCalendarDate = new Date();
+let selectedSessionId = null;
+
 function showJourney() {
-    alert('Journey tracking coming soon!\n\nThis will show:\n\n• Session history\n• Emotional themes over time\n• Your saved insights\n• Progress markers');
+    currentCalendarDate = new Date();
+    renderCalendar();
+    showView('view-journey');
+}
+
+function renderCalendar() {
+    const year = currentCalendarDate.getFullYear();
+    const month = currentCalendarDate.getMonth();
+
+    // Update month/year display
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+    document.getElementById('calendar-month-year').textContent = `${monthNames[month]} ${year}`;
+
+    // Get all sessions for this month
+    const sessions = MAGIE_Storage.getSessions();
+    const sessionsByDate = {};
+
+    sessions.forEach(session => {
+        const sessionDate = new Date(session.timestamp);
+        if (sessionDate.getFullYear() === year && sessionDate.getMonth() === month) {
+            const dateKey = sessionDate.getDate();
+            if (!sessionsByDate[dateKey]) {
+                sessionsByDate[dateKey] = [];
+            }
+            sessionsByDate[dateKey].push(session);
+        }
+    });
+
+    // Build calendar HTML
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    let calendarHTML = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem;">';
+
+    // Day headers
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    dayNames.forEach(day => {
+        calendarHTML += `<div style="text-align: center; font-weight: 600; padding: 0.5rem; color: var(--text-medium);">${day}</div>`;
+    });
+
+    // Empty cells for days before month starts
+    for (let i = 0; i < firstDay; i++) {
+        calendarHTML += '<div></div>';
+    }
+
+    // Calendar days
+    for (let day = 1; day <= daysInMonth; day++) {
+        const hasSessions = sessionsByDate[day] && sessionsByDate[day].length > 0;
+        const hasNotes = hasSessions && sessionsByDate[day].some(s => s.note);
+        const isToday = new Date().getDate() === day &&
+                       new Date().getMonth() === month &&
+                       new Date().getFullYear() === year;
+
+        let cellStyle = 'padding: 1rem; text-align: center; border-radius: var(--radius-md); cursor: pointer; position: relative; transition: var(--transition);';
+
+        if (isToday) {
+            cellStyle += 'border: 2px solid var(--primary-color);';
+        } else {
+            cellStyle += 'border: 1px solid var(--border-color);';
+        }
+
+        if (hasSessions) {
+            cellStyle += 'background-color: var(--bg-light);';
+        }
+
+        let cellContent = `<div>${day}</div>`;
+
+        if (hasSessions) {
+            cellContent += '<div style="position: absolute; bottom: 0.25rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.25rem;">';
+            cellContent += '<span style="width: 6px; height: 6px; background-color: var(--primary-color); border-radius: 50%;"></span>';
+            if (hasNotes) {
+                cellContent += '<span style="font-size: 0.75rem;">📝</span>';
+            }
+            cellContent += '</div>';
+        }
+
+        const onclick = hasSessions ? `onclick="displaySessionNotes(${year}, ${month}, ${day})"` : '';
+        calendarHTML += `<div ${onclick} style="${cellStyle}" ${hasSessions ? 'onmouseover="this.style.backgroundColor=\'var(--bg-gray)\'" onmouseout="this.style.backgroundColor=\'var(--bg-light)\'"' : ''}>${cellContent}</div>`;
+    }
+
+    calendarHTML += '</div>';
+
+    document.getElementById('calendar-container').innerHTML = calendarHTML;
+
+    // Hide notes display
+    document.getElementById('session-notes-display').style.display = 'none';
+}
+
+function previousMonth() {
+    currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+    renderCalendar();
+}
+
+function nextMonth() {
+    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+    renderCalendar();
+}
+
+function displaySessionNotes(year, month, day) {
+    const sessions = MAGIE_Storage.getSessions();
+    const daySessions = sessions.filter(session => {
+        const sessionDate = new Date(session.timestamp);
+        return sessionDate.getFullYear() === year &&
+               sessionDate.getMonth() === month &&
+               sessionDate.getDate() === day;
+    });
+
+    if (daySessions.length === 0) return;
+
+    // Show the notes display
+    const notesDisplay = document.getElementById('session-notes-display');
+    notesDisplay.style.display = 'block';
+
+    // Format date
+    const date = new Date(year, month, day);
+    const dateStr = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('notes-date').textContent = dateStr;
+
+    // Compile all notes for this day
+    let notesHTML = '';
+    daySessions.forEach((session, index) => {
+        const time = new Date(session.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        const type = session.type === 'reflection' ? 'Reflection' : 'Session';
+
+        notesHTML += `<strong>${time} - ${type}</strong>\n`;
+        if (session.note) {
+            notesHTML += session.note + '\n';
+        }
+        if (index < daySessions.length - 1) {
+            notesHTML += '\n---\n\n';
+        }
+    });
+
+    document.getElementById('notes-content').textContent = notesHTML;
+
+    // Store selected date for export
+    selectedSessionId = { year, month, day };
+}
+
+function exportSessionNote() {
+    if (!selectedSessionId) return;
+
+    const { year, month, day } = selectedSessionId;
+    const sessions = MAGIE_Storage.getSessions();
+    const daySessions = sessions.filter(session => {
+        const sessionDate = new Date(session.timestamp);
+        return sessionDate.getFullYear() === year &&
+               sessionDate.getMonth() === month &&
+               sessionDate.getDate() === day;
+    });
+
+    if (daySessions.length === 0) return;
+
+    const date = new Date(year, month, day);
+    const dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
+
+    let content = `MAGIE Session Notes - ${date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n`;
+    content += '='.repeat(80) + '\n\n';
+
+    daySessions.forEach((session, index) => {
+        const time = new Date(session.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        const type = session.type === 'reflection' ? 'Reflection' : 'Session';
+
+        content += `${time} - ${type}\n`;
+        content += '-'.repeat(80) + '\n';
+        if (session.note) {
+            content += session.note + '\n';
+        }
+        if (index < daySessions.length - 1) {
+            content += '\n';
+        }
+    });
+
+    downloadTextFile(content, `MAGIE-${dateStr}.txt`);
+}
+
+function exportAllNotes() {
+    const sessions = MAGIE_Storage.getSessions();
+
+    if (sessions.length === 0) {
+        alert('No sessions to export yet!');
+        return;
+    }
+
+    let content = 'MAGIE Journey - All Sessions and Reflections\n';
+    content += '='.repeat(80) + '\n\n';
+
+    sessions.forEach((session, index) => {
+        const date = new Date(session.timestamp);
+        const dateStr = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        const type = session.type === 'reflection' ? 'Reflection' : 'Session';
+
+        content += `${dateStr} at ${time} - ${type}\n`;
+        content += '-'.repeat(80) + '\n';
+        if (session.note) {
+            content += session.note + '\n';
+        }
+        if (index < sessions.length - 1) {
+            content += '\n\n';
+        }
+    });
+
+    const now = new Date();
+    const filename = `MAGIE-All-Notes-${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')}.txt`;
+    downloadTextFile(content, filename);
+}
+
+function downloadTextFile(content, filename) {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 // ===== ACCOUNT SETTINGS =====
