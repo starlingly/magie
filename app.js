@@ -1494,14 +1494,15 @@ function saveReflection() {
         syncUserDataToSupabase();
     }
 
-    // Clear form and return to dashboard
+    // Clear form
     document.getElementById('reflection-form').reset();
     document.getElementById('reflection-edit-notice').style.display = 'none';
 
+    // Show success message and wait for user to see it before navigating
     setTimeout(() => {
         isSavingReflection = false;
         showDashboard();
-    }, 1500);
+    }, 2500);
 }
 
 function formatReflectionNote(reflection) {
