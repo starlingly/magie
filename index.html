@@ -741,6 +741,74 @@
             </div>
         </section>
 
+        <!-- REFLECTION VIEW -->
+        <section id="view-reflection" class="view">
+            <button class="btn-back" onclick="showDashboard()">← Back to Dashboard</button>
+
+            <h1>Reflect on Last Session</h1>
+
+            <div id="reflection-content">
+                <div class="reflection-prompts" style="background-color: var(--bg-white); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+                    <p style="color: var(--text-medium); margin-bottom: 1.5rem;">
+                        Take a moment to process what came up in your last session.
+                    </p>
+
+                    <form id="reflection-form">
+                        <div class="form-group">
+                            <label for="reflection-landed">What landed?</label>
+                            <textarea id="reflection-landed" rows="3" placeholder="What insights or realizations resonated with you?"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reflection-surprised">What surprised you?</label>
+                            <textarea id="reflection-surprised" rows="3" placeholder="What came up that you didn't expect?"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reflection-primer">What needs to be added to your Primer?</label>
+                            <textarea id="reflection-primer" rows="3" placeholder="New context, patterns, or preferences to add?"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reflection-insights">Any other insights or notes?</label>
+                            <textarea id="reflection-insights" rows="4" placeholder="Anything else you want to remember from this session?"></textarea>
+                        </div>
+
+                        <button type="button" class="btn btn-primary" onclick="saveReflection()">Save Reflection</button>
+                        <button type="button" class="btn btn-secondary" onclick="showDashboard()">Skip for Now</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- JOURNEY VIEW -->
+        <section id="view-journey" class="view">
+            <button class="btn-back" onclick="showDashboard()">← Back to Dashboard</button>
+
+            <h1>My Journey</h1>
+
+            <div style="background-color: var(--bg-white); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 id="calendar-month-year" style="margin: 0;">November 2025</h2>
+                    <div>
+                        <button class="btn btn-secondary" onclick="previousMonth()" style="margin-right: 0.5rem;">← Prev</button>
+                        <button class="btn btn-secondary" onclick="nextMonth()">Next →</button>
+                        <button class="btn btn-primary" onclick="exportAllNotes()" style="margin-left: 1rem;">📥 Export All Notes</button>
+                    </div>
+                </div>
+
+                <div id="calendar-container"></div>
+
+                <div id="session-notes-display" style="margin-top: 2rem; display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 id="notes-date">Session Notes</h3>
+                        <button class="btn btn-secondary" onclick="exportSessionNote()">📥 Export</button>
+                    </div>
+                    <div id="notes-content" style="background-color: var(--bg-gray); padding: 1.5rem; border-radius: var(--radius-md); white-space: pre-wrap;"></div>
+                </div>
+            </div>
+        </section>
+
     </div>
 
     <!-- Breathing Exercise Modal -->
