@@ -1344,11 +1344,24 @@ function showReflection() {
     showView('view-reflection');
 }
 
+let isSavingReflection = false;
+
 function saveReflection() {
+    // Prevent duplicate saves
+    if (isSavingReflection) return;
+    isSavingReflection = true;
+
     const landed = document.getElementById('reflection-landed').value;
     const surprised = document.getElementById('reflection-surprised').value;
     const primer = document.getElementById('reflection-primer').value;
     const insights = document.getElementById('reflection-insights').value;
+
+    // Check if at least one field has content
+    if (!landed && !surprised && !primer && !insights) {
+        alert('Please add at least one reflection before saving.');
+        isSavingReflection = false;
+        return;
+    }
 
     // Create reflection note
     const reflection = {
@@ -1371,11 +1384,14 @@ function saveReflection() {
         syncUserDataToSupabase();
     }
 
-    showToast('✓ Reflection saved!');
+    showToast('✓ Reflection saved successfully!');
 
     // Clear form and return to dashboard
     document.getElementById('reflection-form').reset();
-    setTimeout(() => showDashboard(), 1000);
+    setTimeout(() => {
+        isSavingReflection = false;
+        showDashboard();
+    }, 1500);
 }
 
 function formatReflectionNote(reflection) {
@@ -1557,22 +1573,22 @@ function displaySessionNotes(year, month, day) {
     const dateStr = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     document.getElementById('notes-date').textContent = dateStr;
 
-    // Compile all notes for this day
-    let notesHTML = '';
+    // Compile all notes for this day using markdown formatting
+    let notesText = '';
     meaningfulSessions.forEach((session, index) => {
         const time = new Date(session.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
         const type = session.type === 'reflection' ? 'Reflection' : 'Session';
 
-        notesHTML += `<strong>${time} - ${type}</strong>\n`;
+        notesText += `**${time} - ${type}**\n\n`;
         if (session.note) {
-            notesHTML += session.note + '\n';
+            notesText += session.note + '\n';
         }
         if (index < meaningfulSessions.length - 1) {
-            notesHTML += '\n---\n\n';
+            notesText += '\n---\n\n';
         }
     });
 
-    document.getElementById('notes-content').textContent = notesHTML;
+    document.getElementById('notes-content').textContent = notesText;
 
     // Store selected date for export
     selectedSessionId = { year, month, day };
@@ -1598,21 +1614,27 @@ function exportSessionNote() {
         return;
     }
 
+    // Get user name
+    const settings = MAGIE_Storage.getSettings();
+    const primer = MAGIE_Storage.getPrimer();
+    const userName = settings.userName || (primer && primer.name) || 'MAGIE User';
+
     const date = new Date(year, month, day);
     const dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
 
-    let content = `MAGIE Session Notes - ${date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n`;
-    content += '='.repeat(80) + '\n\n';
+    let content = `# MAGIE Session Notes\n\n`;
+    content += `**User:** ${userName}\n`;
+    content += `**Date:** ${date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n\n`;
+    content += `---\n\n`;
 
     meaningfulSessions.forEach((session, index) => {
         const time = new Date(session.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
         const type = session.type === 'reflection' ? 'Reflection' : 'Session';
 
-        content += `${time} - ${type}\n`;
-        content += '-'.repeat(80) + '\n';
+        content += `## ${time} - ${type}\n\n`;
         content += session.note + '\n';
         if (index < meaningfulSessions.length - 1) {
-            content += '\n';
+            content += '\n---\n\n';
         }
     });
 
@@ -1630,8 +1652,19 @@ function exportAllNotes() {
         return;
     }
 
-    let content = 'MAGIE Journey - All Sessions and Reflections\n';
-    content += '='.repeat(80) + '\n\n';
+    // Get user name
+    const settings = MAGIE_Storage.getSettings();
+    const primer = MAGIE_Storage.getPrimer();
+    const userName = settings.userName || (primer && primer.name) || 'MAGIE User';
+
+    const now = new Date();
+    const exportDate = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    let content = `# MAGIE Journey - Complete Session History\n\n`;
+    content += `**User:** ${userName}\n`;
+    content += `**Exported:** ${exportDate}\n`;
+    content += `**Total Sessions:** ${meaningfulSessions.length}\n\n`;
+    content += `---\n\n`;
 
     meaningfulSessions.forEach((session, index) => {
         const date = new Date(session.timestamp);
@@ -1639,15 +1672,13 @@ function exportAllNotes() {
         const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
         const type = session.type === 'reflection' ? 'Reflection' : 'Session';
 
-        content += `${dateStr} at ${time} - ${type}\n`;
-        content += '-'.repeat(80) + '\n';
+        content += `## ${dateStr} at ${time} - ${type}\n\n`;
         content += session.note + '\n';
         if (index < meaningfulSessions.length - 1) {
-            content += '\n\n';
+            content += '\n---\n\n';
         }
     });
 
-    const now = new Date();
     const filename = `MAGIE-All-Notes-${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')}.txt`;
     downloadTextFile(content, filename);
 }
