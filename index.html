@@ -775,8 +775,12 @@
                         </div>
 
                         <button type="button" class="btn btn-primary" onclick="saveReflection()">Save Reflection</button>
-                        <button type="button" class="btn btn-secondary" onclick="showDashboard()">Skip for Now</button>
+                        <button type="button" class="btn btn-secondary" onclick="cancelReflectionEdit()">Cancel</button>
                     </form>
+
+                    <div id="reflection-edit-notice" style="display: none; background-color: #fff3cd; border: 1px solid #ffc107; padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem;">
+                        <p style="margin: 0; color: #856404;"><strong>✏️ Editing Note:</strong> <span id="editing-note-info"></span></p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -802,9 +806,16 @@
                 <div id="session-notes-display" style="margin-top: 2rem; display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                         <h3 id="notes-date">Session Notes</h3>
-                        <button class="btn btn-secondary" onclick="exportSessionNote()">📥 Export</button>
+                        <div>
+                            <button class="btn btn-secondary" onclick="editSelectedNote()" style="margin-right: 0.5rem;">✏️ Edit</button>
+                            <button class="btn btn-secondary" onclick="exportSessionNote()">📥 Export</button>
+                        </div>
                     </div>
                     <div id="notes-content" style="background-color: var(--bg-gray); padding: 1.5rem; border-radius: var(--radius-md); white-space: pre-wrap;"></div>
+                    <div id="notes-list" style="display: none; margin-top: 1rem;">
+                        <p style="color: var(--text-medium); margin-bottom: 1rem;">Select which note to edit:</p>
+                        <div id="editable-notes-list"></div>
+                    </div>
                 </div>
             </div>
         </section>
