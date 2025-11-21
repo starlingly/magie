@@ -1333,6 +1333,10 @@ function showReflection() {
     // Clear the form
     document.getElementById('reflection-form').reset();
 
+    // Hide edit notice
+    document.getElementById('reflection-edit-notice').style.display = 'none';
+    currentEditingSessionId = null;
+
     // Load last session info if available
     const sessions = MAGIE_Storage.getSessions();
     if (sessions.length === 0) {
@@ -1341,7 +1345,99 @@ function showReflection() {
         return;
     }
 
+    // Update button text for new reflection
+    document.querySelector('#reflection-form .btn-primary').textContent = 'Save Reflection';
+    document.querySelector('#reflection-form .btn-secondary').textContent = 'Skip for Now';
+    document.querySelector('#reflection-form .btn-secondary').setAttribute('onclick', 'showDashboard()');
+
     showView('view-reflection');
+}
+
+let currentEditingSessionId = null;
+
+function editSelectedNote() {
+    if (!selectedSessionId) return;
+
+    const { year, month, day } = selectedSessionId;
+    const sessions = MAGIE_Storage.getSessions();
+    const daySessions = sessions.filter(session => {
+        const sessionDate = new Date(session.timestamp);
+        return sessionDate.getFullYear() === year &&
+               sessionDate.getMonth() === month &&
+               sessionDate.getDate() === day;
+    });
+
+    const meaningfulSessions = daySessions.filter(s => s.note && s.note !== 'Session started');
+
+    if (meaningfulSessions.length === 0) return;
+
+    // If only one session, edit it directly
+    if (meaningfulSessions.length === 1) {
+        loadSessionForEditing(meaningfulSessions[0]);
+        return;
+    }
+
+    // Multiple sessions - show selection list
+    const notesList = document.getElementById('notes-list');
+    const notesListContent = document.getElementById('editable-notes-list');
+
+    notesListContent.innerHTML = '';
+
+    meaningfulSessions.forEach(session => {
+        const time = new Date(session.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        const type = session.type === 'reflection' ? 'Reflection' : 'Session';
+        const preview = session.note.substring(0, 100) + (session.note.length > 100 ? '...' : '');
+
+        const button = document.createElement('button');
+        button.className = 'btn btn-secondary';
+        button.style.cssText = 'width: 100%; text-align: left; margin-bottom: 0.5rem; padding: 1rem;';
+        button.innerHTML = `<strong>${time} - ${type}</strong><br><small style="color: var(--text-medium);">${preview}</small>`;
+        button.onclick = () => loadSessionForEditing(session);
+
+        notesListContent.appendChild(button);
+    });
+
+    notesList.style.display = 'block';
+}
+
+function loadSessionForEditing(session) {
+    currentEditingSessionId = session.id;
+
+    // Populate form with existing data
+    if (session.reflection) {
+        document.getElementById('reflection-landed').value = session.reflection.landed || '';
+        document.getElementById('reflection-surprised').value = session.reflection.surprised || '';
+        document.getElementById('reflection-primer').value = session.reflection.primer || '';
+        document.getElementById('reflection-insights').value = session.reflection.insights || '';
+    } else {
+        // For non-reflection sessions, put note in insights field
+        document.getElementById('reflection-landed').value = '';
+        document.getElementById('reflection-surprised').value = '';
+        document.getElementById('reflection-primer').value = '';
+        document.getElementById('reflection-insights').value = session.note || '';
+    }
+
+    // Show edit notice
+    const date = new Date(session.timestamp);
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    document.getElementById('editing-note-info').textContent = `${dateStr} at ${timeStr}`;
+    document.getElementById('reflection-edit-notice').style.display = 'block';
+
+    // Update button text
+    document.querySelector('#reflection-form .btn-primary').textContent = 'Update Reflection';
+    document.querySelector('#reflection-form .btn-secondary').textContent = 'Cancel';
+    document.querySelector('#reflection-form .btn-secondary').setAttribute('onclick', 'cancelReflectionEdit()');
+
+    // Go to reflection view
+    showView('view-reflection');
+}
+
+function cancelReflectionEdit() {
+    currentEditingSessionId = null;
+    document.getElementById('reflection-edit-notice').style.display = 'none';
+    document.getElementById('reflection-form').reset();
+    showDashboard();
 }
 
 let isSavingReflection = false;
@@ -1372,22 +1468,36 @@ function saveReflection() {
         timestamp: new Date().toISOString()
     };
 
-    // Save as a session entry
-    MAGIE_Storage.addSession({
-        type: 'reflection',
-        note: formatReflectionNote(reflection),
-        reflection: reflection
-    });
+    if (currentEditingSessionId) {
+        // Update existing session
+        MAGIE_Storage.updateSession(currentEditingSessionId, {
+            note: formatReflectionNote(reflection),
+            reflection: reflection,
+            timestamp: new Date().toISOString()
+        });
+
+        showToast('✓ Reflection updated successfully!');
+        currentEditingSessionId = null;
+    } else {
+        // Save as new session entry
+        MAGIE_Storage.addSession({
+            type: 'reflection',
+            note: formatReflectionNote(reflection),
+            reflection: reflection
+        });
+
+        showToast('✓ Reflection saved successfully!');
+    }
 
     // Sync to Supabase if available
     if (supabase && currentUser) {
         syncUserDataToSupabase();
     }
 
-    showToast('✓ Reflection saved successfully!');
-
     // Clear form and return to dashboard
     document.getElementById('reflection-form').reset();
+    document.getElementById('reflection-edit-notice').style.display = 'none';
+
     setTimeout(() => {
         isSavingReflection = false;
         showDashboard();
