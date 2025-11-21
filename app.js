@@ -906,11 +906,12 @@ async function initializeApp() {
     // Set up event listeners
     setupEventListeners();
 
-    // Show crisis banner if setting is enabled
+    // Show crisis banner once per session if setting is enabled
     const settings = MAGIE_Storage.getSettings();
-    if (settings.showCrisisBanner) {
+    if (settings.showCrisisBanner && !sessionStorage.getItem('crisisBannerShown')) {
         setTimeout(() => {
             document.getElementById('crisis-banner').classList.remove('hidden');
+            sessionStorage.setItem('crisisBannerShown', 'true');
         }, 2000);
     }
 }
@@ -1468,6 +1469,10 @@ function saveReflection() {
         timestamp: new Date().toISOString()
     };
 
+    // Determine message first
+    const isUpdate = currentEditingSessionId !== null;
+    const successMessage = isUpdate ? '✓ Reflection updated successfully!' : '✓ Reflection saved successfully!';
+
     if (currentEditingSessionId) {
         // Update existing session
         MAGIE_Storage.updateSession(currentEditingSessionId, {
@@ -1475,8 +1480,6 @@ function saveReflection() {
             reflection: reflection,
             timestamp: new Date().toISOString()
         });
-
-        showToast('✓ Reflection updated successfully!');
         currentEditingSessionId = null;
     } else {
         // Save as new session entry
@@ -1485,14 +1488,15 @@ function saveReflection() {
             note: formatReflectionNote(reflection),
             reflection: reflection
         });
-
-        showToast('✓ Reflection saved successfully!');
     }
 
     // Sync to Supabase if available
     if (supabase && currentUser) {
         syncUserDataToSupabase();
     }
+
+    // Show success toast
+    showToast(successMessage);
 
     // Clear form
     document.getElementById('reflection-form').reset();
@@ -1507,10 +1511,10 @@ function saveReflection() {
 
 function formatReflectionNote(reflection) {
     let note = '';
-    if (reflection.landed) note += `What landed:\n${reflection.landed}\n\n`;
-    if (reflection.surprised) note += `What surprised me:\n${reflection.surprised}\n\n`;
-    if (reflection.primer) note += `To add to Primer:\n${reflection.primer}\n\n`;
-    if (reflection.insights) note += `Other insights:\n${reflection.insights}`;
+    if (reflection.landed) note += `### What landed\n${reflection.landed}\n\n`;
+    if (reflection.surprised) note += `### What surprised me\n${reflection.surprised}\n\n`;
+    if (reflection.primer) note += `### To add to Primer\n${reflection.primer}\n\n`;
+    if (reflection.insights) note += `### Other insights\n${reflection.insights}`;
     return note.trim();
 }
 
@@ -1532,6 +1536,11 @@ let selectedSessionId = null;
 function showJourney() {
     currentCalendarDate = new Date();
     renderCalendar();
+
+    // Hide notes display when opening journey
+    document.getElementById('session-notes-display').style.display = 'none';
+    document.getElementById('notes-list').style.display = 'none';
+
     showView('view-journey');
 }
 
