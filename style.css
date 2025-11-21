@@ -917,6 +917,63 @@ summary {
     cursor: pointer;
 }
 
+/* Auth Modal Tabs & Forms */
+.auth-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    color: var(--text-medium);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.auth-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.auth-tab:hover {
+    color: var(--primary-dark);
+}
+
+.auth-form {
+    display: none;
+}
+
+.auth-form.active {
+    display: block;
+}
+
+.auth-error,
+.auth-success {
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+}
+
+.auth-error {
+    background-color: #fff5f5;
+    color: var(--error-color);
+    border: 1px solid var(--error-color);
+}
+
+.auth-success {
+    background-color: #f0fff4;
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
+}
+
 .breathing-circle {
     width: 200px;
     height: 200px;
