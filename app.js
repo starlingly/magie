@@ -11,15 +11,8 @@ let supabase = null;
 let currentUser = null;
 
 function setCloudStatus(status, message) {
-    const statusEl = document.getElementById('cloud-status');
-    if (!statusEl) return;
-
-    statusEl.textContent = message;
-    statusEl.classList.remove('hidden', 'success', 'warning', 'error');
-
-    if (status) {
-        statusEl.classList.add(status);
-    }
+    // Cloud status banner removed - sync works silently in the background
+    // Keeping function for backwards compatibility
 }
 
 function initSupabase() {
@@ -947,16 +940,6 @@ function showView(viewId) {
     if (targetView) {
         targetView.classList.add('active');
         window.scrollTo(0, 0);
-    }
-
-    // Hide cloud status on landing page, show on all other views
-    const cloudStatus = document.getElementById('cloud-status');
-    if (cloudStatus) {
-        if (viewId === 'view-landing') {
-            cloudStatus.classList.add('hidden');
-        } else {
-            cloudStatus.classList.remove('hidden');
-        }
     }
 
     // Show dashboard link on about page if user is logged in
