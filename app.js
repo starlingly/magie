@@ -484,7 +484,7 @@ const MAGIE_Storage = {
     addSession(session) {
         const sessions = this.getSessions();
         const newSession = {
-            id: Date.now(),
+            id: crypto.randomUUID(), // Generate proper UUID for Supabase compatibility
             timestamp: new Date().toISOString(),
             ...session
         };
