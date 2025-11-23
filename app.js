@@ -171,6 +171,27 @@ function showAuthSuccess(message) {
     successEl.classList.remove('hidden');
 }
 
+// Save-to-signin modal functions
+function closeSaveSigninModal() {
+    document.getElementById('save-signin-modal').classList.add('hidden');
+}
+
+function openSaveSigninModal() {
+    document.getElementById('save-signin-modal').classList.remove('hidden');
+}
+
+function promptSignIn() {
+    closeSaveSigninModal();
+    switchAuthTab('signin');
+    document.getElementById('auth-modal').classList.remove('hidden');
+}
+
+function promptSignUp() {
+    closeSaveSigninModal();
+    switchAuthTab('signup');
+    document.getElementById('auth-modal').classList.remove('hidden');
+}
+
 async function handleSignUp(event) {
     event.preventDefault();
     clearAuthMessages();
@@ -1436,6 +1457,12 @@ document.addEventListener('DOMContentLoaded', function() {
 // ===== DASHBOARD =====
 
 function showDashboard() {
+    // Redirect unauthenticated users to features view
+    if (!currentUser) {
+        showView('view-features');
+        return;
+    }
+
     const primer = MAGIE_Storage.getPrimer();
     const settings = MAGIE_Storage.getSettings();
     const sessionCount = MAGIE_Storage.getSessionCount();
@@ -1630,6 +1657,13 @@ async function saveReflection() {
     isSavingReflection = true;
 
     try {
+        // Check if user is authenticated - if not, show sign-in modal
+        if (!currentUser) {
+            isSavingReflection = false;
+            openSaveSigninModal();
+            return;
+        }
+
         // Get selected date and note type
         const dateInput = document.getElementById('note-date').value;
         if (!dateInput) {
@@ -1761,9 +1795,32 @@ function formatReflectionNote(reflection) {
     return note.trim();
 }
 
+function showPrimerWizard() {
+    // Load current primer data
+    loadPrimerData();
+
+    // Show the primer save warning if not authenticated
+    const warningEl = document.getElementById('primer-save-warning');
+    if (warningEl) {
+        warningEl.style.display = !currentUser ? 'block' : 'none';
+    }
+
+    // Show primer wizard for editing
+    showView('view-primer-wizard');
+
+    // Start at first section
+    nextPrimerSection('intro');
+}
+
 function showPrimerManager() {
     // Load current primer data
     loadPrimerData();
+
+    // Show the primer save warning if not authenticated
+    const warningEl = document.getElementById('primer-save-warning');
+    if (warningEl) {
+        warningEl.style.display = !currentUser ? 'block' : 'none';
+    }
 
     // Show primer wizard for editing
     showView('view-primer-wizard');
@@ -1777,6 +1834,12 @@ let currentCalendarDate = new Date();
 let selectedSessionId = null;
 
 function showJourney() {
+    // Redirect unauthenticated users to features view
+    if (!currentUser) {
+        showView('view-features');
+        return;
+    }
+
     currentCalendarDate = new Date();
     renderCalendar();
 
