@@ -58,6 +58,8 @@
                 <div class="returning-user">
                     <a href="#" onclick="handleReturningUser(); return false;">I'm Returning →</a>
                     <span style="color: var(--text-light); margin: 0 0.5rem;">•</span>
+                    <a href="#" onclick="openInstallModal(); return false;" style="color: var(--text-medium); text-decoration: none;">Get the App</a>
+                    <span style="color: var(--text-light); margin: 0 0.5rem;">•</span>
                     <a href="https://forms.gle/GvDCFzA5mrE9jSJB9" target="_blank" style="color: var(--text-medium); text-decoration: none;">Feedback</a>
                 </div>
             </div>
@@ -634,7 +636,8 @@
                     <button class="btn btn-secondary" onclick="showView('view-about')">Learn About MAGIE</button>
                     <button class="btn btn-secondary" onclick="showPrimerWizard()" style="margin-left: 0.5rem;">Build Your Primer</button>
                     <br>
-                    <p style="color: var(--text-light); margin-top: 1.5rem; font-size: 0.9rem;">Have feedback or found a bug? <a href="https://forms.gle/GvDCFzA5mrE9jSJB9" target="_blank" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">Share it with us →</a></p>
+                    <p style="color: var(--text-light); margin-top: 1rem; font-size: 0.9rem;">💡 <a href="#" onclick="openInstallModal(); return false;" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">Install MAGIE on your home screen →</a></p>
+                    <p style="color: var(--text-light); margin-top: 1rem; font-size: 0.9rem;">Have feedback or found a bug? <a href="https://forms.gle/GvDCFzA5mrE9jSJB9" target="_blank" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">Share it with us →</a></p>
                 </div>
             </div>
         </section>
@@ -945,6 +948,43 @@
             </div>
             <p style="text-align: center; margin-top: 1.5rem; color: var(--text-light); font-size: 0.9rem;">Or continue without saving</p>
             <button class="btn-text" onclick="closeSaveSigninModal()" style="display: block; margin: 0 auto;">Continue without saving</button>
+        </div>
+    </div>
+
+    <!-- Install App Modal -->
+    <div id="install-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeInstallModal()">×</button>
+            <h2>📱 Install MAGIE on Your Phone</h2>
+            <p style="color: var(--text-medium); margin-bottom: 1.5rem;">Get MAGIE on your home screen for quick access. Works offline and syncs when you're online!</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <!-- iOS Instructions -->
+                <div style="padding: 1rem; background-color: var(--bg-gray); border-radius: var(--radius-md); border-left: 4px solid var(--primary-color);">
+                    <h3 style="margin-top: 0; margin-bottom: 0.75rem;">🍎 iPhone/iPad</h3>
+                    <ol style="margin: 0; padding-left: 1.5rem; color: var(--text-medium); font-size: 0.95rem;">
+                        <li>Tap the <strong>Share</strong> button (bottom right)</li>
+                        <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                        <li>Tap <strong>"Add"</strong></li>
+                    </ol>
+                </div>
+
+                <!-- Android Instructions -->
+                <div style="padding: 1rem; background-color: var(--bg-gray); border-radius: var(--radius-md); border-left: 4px solid var(--accent-color);">
+                    <h3 style="margin-top: 0; margin-bottom: 0.75rem;">🤖 Android</h3>
+                    <ol style="margin: 0; padding-left: 1.5rem; color: var(--text-medium); font-size: 0.95rem;">
+                        <li>Tap the <strong>menu</strong> (three dots, top right)</li>
+                        <li>Tap <strong>"Install app"</strong></li>
+                        <li>Tap <strong>"Install"</strong></li>
+                    </ol>
+                </div>
+            </div>
+
+            <div style="padding: 1rem; background-color: rgba(99, 102, 241, 0.1); border-radius: var(--radius-md); margin-bottom: 1rem;">
+                <p style="margin: 0; font-size: 0.9rem; color: var(--text-medium);"><strong>💡 Tip:</strong> The app will work offline and sync your progress when you're back online.</p>
+            </div>
+
+            <button class="btn btn-primary" onclick="closeInstallModal()" style="width: 100%;">Got it!</button>
         </div>
     </div>
 
