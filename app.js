@@ -207,6 +207,15 @@ function promptSignUp() {
     document.getElementById('auth-modal').classList.remove('hidden');
 }
 
+// Install modal functions
+function openInstallModal() {
+    document.getElementById('install-modal').classList.remove('hidden');
+}
+
+function closeInstallModal() {
+    document.getElementById('install-modal').classList.add('hidden');
+}
+
 async function handleSignUp(event) {
     event.preventDefault();
     clearAuthMessages();
