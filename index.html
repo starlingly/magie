@@ -755,26 +755,56 @@
 
                     <form id="reflection-form">
                         <div class="form-group">
-                            <label for="reflection-landed">What landed?</label>
-                            <textarea id="reflection-landed" rows="3" placeholder="What insights or realizations resonated with you?"></textarea>
+                            <label for="note-date">Date</label>
+                            <input type="date" id="note-date" />
                         </div>
 
                         <div class="form-group">
-                            <label for="reflection-surprised">What surprised you?</label>
-                            <textarea id="reflection-surprised" rows="3" placeholder="What came up that you didn't expect?"></textarea>
+                            <label>Note Type</label>
+                            <div style="display: flex; gap: 2rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
+                                    <input type="radio" id="note-type-reflection" name="note-type" value="reflection" checked onchange="updateFormForNoteType()" />
+                                    Reflection
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
+                                    <input type="radio" id="note-type-other" name="note-type" value="other" onchange="updateFormForNoteType()" />
+                                    Other
+                                </label>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="reflection-primer">What needs to be added to your Primer?</label>
-                            <textarea id="reflection-primer" rows="3" placeholder="New context, patterns, or preferences to add?"></textarea>
+                        <!-- Reflection Form -->
+                        <div id="reflection-form-fields">
+                            <div class="form-group">
+                                <label for="reflection-landed">What landed?</label>
+                                <textarea id="reflection-landed" rows="3" placeholder="What insights or realizations resonated with you?"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="reflection-surprised">What surprised you?</label>
+                                <textarea id="reflection-surprised" rows="3" placeholder="What came up that you didn't expect?"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="reflection-primer">What needs to be added to your Primer?</label>
+                                <textarea id="reflection-primer" rows="3" placeholder="New context, patterns, or preferences to add?"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="reflection-insights">Any other insights or notes?</label>
+                                <textarea id="reflection-insights" rows="4" placeholder="Anything else you want to remember from this session?"></textarea>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="reflection-insights">Any other insights or notes?</label>
-                            <textarea id="reflection-insights" rows="4" placeholder="Anything else you want to remember from this session?"></textarea>
+                        <!-- Other Note Form -->
+                        <div id="other-note-form-fields" style="display: none;">
+                            <div class="form-group">
+                                <label for="other-note">Note</label>
+                                <textarea id="other-note" rows="6" placeholder="Write your note here..."></textarea>
+                            </div>
                         </div>
 
-                        <button type="button" class="btn btn-primary" onclick="saveReflection()">Save Reflection</button>
+                        <button type="button" class="btn btn-primary" onclick="saveReflection()">Save</button>
                         <button type="button" class="btn btn-secondary" onclick="cancelReflectionEdit()">Cancel</button>
                     </form>
 
