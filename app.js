@@ -1485,6 +1485,10 @@ function showReflection() {
     // Clear the form
     document.getElementById('reflection-form').reset();
 
+    // Set date input to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('note-date').value = today;
+
     // Hide edit notice
     document.getElementById('reflection-edit-notice').style.display = 'none';
     currentEditingSessionId = null;
@@ -1498,11 +1502,29 @@ function showReflection() {
     }
 
     // Update button text for new reflection
-    document.querySelector('#reflection-form .btn-primary').textContent = 'Save Reflection';
+    document.querySelector('#reflection-form .btn-primary').textContent = 'Save';
     document.querySelector('#reflection-form .btn-secondary').textContent = 'Skip for Now';
     document.querySelector('#reflection-form .btn-secondary').setAttribute('onclick', 'showDashboard()');
 
+    // Reset form to reflection type
+    document.getElementById('note-type-reflection').checked = true;
+    updateFormForNoteType();
+
     showView('view-reflection');
+}
+
+function updateFormForNoteType() {
+    const noteType = document.querySelector('input[name="note-type"]:checked').value;
+    const reflectionFields = document.getElementById('reflection-form-fields');
+    const otherNoteFields = document.getElementById('other-note-form-fields');
+
+    if (noteType === 'reflection') {
+        reflectionFields.style.display = 'block';
+        otherNoteFields.style.display = 'none';
+    } else {
+        reflectionFields.style.display = 'none';
+        otherNoteFields.style.display = 'block';
+    }
 }
 
 let currentEditingSessionId = null;
@@ -1537,7 +1559,9 @@ function editSelectedNote() {
 
     meaningfulSessions.forEach(session => {
         const time = new Date(session.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-        const type = session.type === 'reflection' ? 'Reflection' : 'Session';
+        let type = 'Session';
+        if (session.type === 'reflection') type = 'Reflection';
+        else if (session.type === 'other') type = 'Other';
         const preview = session.note.substring(0, 100) + (session.note.length > 100 ? '...' : '');
 
         const button = document.createElement('button');
@@ -1555,29 +1579,35 @@ function editSelectedNote() {
 function loadSessionForEditing(session) {
     currentEditingSessionId = session.id;
 
-    // Populate form with existing data
+    // Set date input to session date
+    const date = new Date(session.timestamp);
+    const dateStr = date.toISOString().split('T')[0];
+    document.getElementById('note-date').value = dateStr;
+
+    // Determine note type and populate form
     if (session.reflection) {
+        document.getElementById('note-type-reflection').checked = true;
         document.getElementById('reflection-landed').value = session.reflection.landed || '';
         document.getElementById('reflection-surprised').value = session.reflection.surprised || '';
         document.getElementById('reflection-primer').value = session.reflection.primer || '';
         document.getElementById('reflection-insights').value = session.reflection.insights || '';
     } else {
-        // For non-reflection sessions, put note in insights field
-        document.getElementById('reflection-landed').value = '';
-        document.getElementById('reflection-surprised').value = '';
-        document.getElementById('reflection-primer').value = '';
-        document.getElementById('reflection-insights').value = session.note || '';
+        // For non-reflection sessions, it's an "Other" note
+        document.getElementById('note-type-other').checked = true;
+        document.getElementById('other-note').value = session.note || '';
     }
 
-    // Show edit notice
-    const date = new Date(session.timestamp);
-    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    // Update form display based on note type
+    updateFormForNoteType();
+
+    // Show edit notice with time info
     const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    document.getElementById('editing-note-info').textContent = `${dateStr} at ${timeStr}`;
+    const displayDateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    document.getElementById('editing-note-info').textContent = `${displayDateStr} at ${timeStr}`;
     document.getElementById('reflection-edit-notice').style.display = 'block';
 
     // Update button text
-    document.querySelector('#reflection-form .btn-primary').textContent = 'Update Reflection';
+    document.querySelector('#reflection-form .btn-primary').textContent = 'Update';
     document.querySelector('#reflection-form .btn-secondary').textContent = 'Cancel';
     document.querySelector('#reflection-form .btn-secondary').setAttribute('onclick', 'cancelReflectionEdit()');
 
@@ -1600,48 +1630,96 @@ async function saveReflection() {
     isSavingReflection = true;
 
     try {
-        const landed = document.getElementById('reflection-landed').value;
-        const surprised = document.getElementById('reflection-surprised').value;
-        const primer = document.getElementById('reflection-primer').value;
-        const insights = document.getElementById('reflection-insights').value;
-
-        // Check if at least one field has content
-        if (!landed && !surprised && !primer && !insights) {
-            alert('Please add at least one reflection before saving.');
+        // Get selected date and note type
+        const dateInput = document.getElementById('note-date').value;
+        if (!dateInput) {
+            alert('Please select a date.');
             isSavingReflection = false;
             return;
         }
 
-        // Create reflection note
-        const reflection = {
-            landed,
-            surprised,
-            primer,
-            insights,
-            timestamp: new Date().toISOString()
-        };
+        const noteType = document.querySelector('input[name="note-type"]:checked').value;
 
-        // Determine message first
+        // Parse the date from the input (which is in YYYY-MM-DD format)
+        // Convert to ISO timestamp at 12:00 PM local time
+        const dateParts = dateInput.split('-');
+        const year = parseInt(dateParts[0]);
+        const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed
+        const day = parseInt(dateParts[2]);
+        const selectedDate = new Date(year, month, day, 12, 0, 0);
+        const timestamp = selectedDate.toISOString();
+
+        // Determine message and note type
         const isUpdate = currentEditingSessionId !== null;
-        const successMessage = isUpdate ? '✓ Reflection updated successfully!' : '✓ Reflection saved successfully!';
+        const successMessage = isUpdate ? '✓ Note updated successfully!' : '✓ Note saved successfully!';
 
-        console.log(`Saving reflection (isUpdate: ${isUpdate})...`);
+        console.log(`Saving note (isUpdate: ${isUpdate}, type: ${noteType})...`);
 
-        if (currentEditingSessionId) {
-            // Update existing session
-            MAGIE_Storage.updateSession(currentEditingSessionId, {
-                note: formatReflectionNote(reflection),
-                reflection: reflection,
-                timestamp: new Date().toISOString()
-            });
-            currentEditingSessionId = null;
+        if (noteType === 'reflection') {
+            const landed = document.getElementById('reflection-landed').value;
+            const surprised = document.getElementById('reflection-surprised').value;
+            const primer = document.getElementById('reflection-primer').value;
+            const insights = document.getElementById('reflection-insights').value;
+
+            // Check if at least one field has content
+            if (!landed && !surprised && !primer && !insights) {
+                alert('Please add at least one reflection before saving.');
+                isSavingReflection = false;
+                return;
+            }
+
+            // Create reflection note
+            const reflection = {
+                landed,
+                surprised,
+                primer,
+                insights,
+                timestamp: timestamp
+            };
+
+            if (currentEditingSessionId) {
+                // Update existing session
+                MAGIE_Storage.updateSession(currentEditingSessionId, {
+                    note: formatReflectionNote(reflection),
+                    reflection: reflection,
+                    timestamp: timestamp
+                });
+                currentEditingSessionId = null;
+            } else {
+                // Save as new session entry
+                MAGIE_Storage.addSession({
+                    type: 'reflection',
+                    note: formatReflectionNote(reflection),
+                    reflection: reflection,
+                    timestamp: timestamp
+                });
+            }
         } else {
-            // Save as new session entry
-            MAGIE_Storage.addSession({
-                type: 'reflection',
-                note: formatReflectionNote(reflection),
-                reflection: reflection
-            });
+            // Handle "Other" note type
+            const otherNote = document.getElementById('other-note').value;
+
+            if (!otherNote) {
+                alert('Please enter a note before saving.');
+                isSavingReflection = false;
+                return;
+            }
+
+            if (currentEditingSessionId) {
+                // Update existing session
+                MAGIE_Storage.updateSession(currentEditingSessionId, {
+                    note: otherNote,
+                    type: 'other',
+                    timestamp: timestamp
+                });
+                currentEditingSessionId = null;
+            } else {
+                // Save as new session entry
+                MAGIE_Storage.addSession({
+                    type: 'other',
+                    note: otherNote,
+                    timestamp: timestamp
+                });
+            }
         }
 
         console.log('Reflection saved to localStorage');
@@ -1862,7 +1940,9 @@ function displaySessionNotes(year, month, day) {
     let notesText = '';
     meaningfulSessions.forEach((session, index) => {
         const time = new Date(session.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-        const type = session.type === 'reflection' ? 'Reflection' : 'Session';
+        let type = 'Session';
+        if (session.type === 'reflection') type = 'Reflection';
+        else if (session.type === 'other') type = 'Other';
 
         notesText += `**${time} - ${type}**\n\n`;
         if (session.note) {
@@ -1914,7 +1994,9 @@ function exportSessionNote() {
 
     meaningfulSessions.forEach((session, index) => {
         const time = new Date(session.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-        const type = session.type === 'reflection' ? 'Reflection' : 'Session';
+        let type = 'Session';
+        if (session.type === 'reflection') type = 'Reflection';
+        else if (session.type === 'other') type = 'Other';
 
         content += `## ${time} - ${type}\n\n`;
         content += session.note + '\n';
@@ -1955,7 +2037,9 @@ function exportAllNotes() {
         const date = new Date(session.timestamp);
         const dateStr = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-        const type = session.type === 'reflection' ? 'Reflection' : 'Session';
+        let type = 'Session';
+        if (session.type === 'reflection') type = 'Reflection';
+        else if (session.type === 'other') type = 'Other';
 
         content += `## ${dateStr} at ${time} - ${type}\n\n`;
         content += session.note + '\n';
