@@ -245,9 +245,9 @@ For permissions or questions, contact Starling.
 
 ## Contact & Support
 
-- **Issues**: Report bugs or suggest features via GitHub Issues
-- **Community**: [Link to community when ready]
-- **Creator**: Starling's contact info
+- **Issues**: Report bugs or suggest features via GitHub Issues or [MAGIE Feedback (Google Forms)](https://forms.gle/K5VWPA4bzFWLhQo89). 
+- **Community**: Coming soon!
+- **Creator**: Starling
 
 ---
 
