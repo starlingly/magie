@@ -372,6 +372,10 @@
             <h1>Let's Build Your Primer Together</h1>
             <p class="subtitle">Your Primer is your continuity. We'll build it one section at a time.</p>
 
+            <div id="primer-save-warning" style="padding: 1rem; margin-bottom: 1.5rem; background-color: #fff3cd; border: 2px solid #ffc107; border-radius: var(--radius-md); display: none;">
+                <p style="margin: 0; color: #856404;"><strong>⚠️ Note:</strong> <span style="color: #d32f2f;"><strong>To save your Primer and session progress, you'll need to create an account.</strong></span> You can export and download your work anytime, but only logged-in users can save it to the cloud and track your journey.</p>
+            </div>
+
             <!-- Primer Progress -->
             <div class="primer-progress">
                 <div class="progress-step active" data-section="intro">Intro</div>
@@ -572,12 +576,59 @@
             </div>
         </section>
 
+        <!-- FEATURES EXPLANATION (for unauthenticated users) -->
+        <section id="view-features" class="view">
+            <div class="hero">
+                <h1>MAGIE Companion</h1>
+                <p class="subtitle">A guide for therapeutic self-exploration with AI</p>
+            </div>
+
+            <div style="background-color: var(--bg-white); padding: 2.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); margin-bottom: 2rem; max-width: 900px; margin-left: auto; margin-right: auto;">
+                <h2 style="text-align: center; margin-bottom: 2rem;">What You Can Do</h2>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div style="padding: 1.5rem; background-color: var(--bg-gray); border-radius: var(--radius-md); border-left: 4px solid var(--primary-color);">
+                        <h3 style="margin-bottom: 0.5rem;">✓ Available Without Sign-Up</h3>
+                        <ul style="margin: 0; padding-left: 1.5rem; color: var(--text-medium);">
+                            <li>Build your <strong>Primer</strong> - Create your personal context document</li>
+                            <li>Try the <strong>Breathing Exercise</strong> - Guided breathing practice</li>
+                            <li>Export your work - Download what you create</li>
+                        </ul>
+                        <p style="margin: 1rem 0 0 0; font-size: 0.9rem; color: var(--text-light);">Everything is saved locally on your device</p>
+                    </div>
+
+                    <div style="padding: 1.5rem; background-color: var(--bg-gray); border-radius: var(--radius-md); border-left: 4px solid var(--accent-color);">
+                        <h3 style="margin-bottom: 0.5rem;">🔐 Requires Sign-Up</h3>
+                        <ul style="margin: 0; padding-left: 1.5rem; color: var(--text-medium);">
+                            <li>Save <strong>Sessions & Reflections</strong> - Track your practice</li>
+                            <li>Access <strong>Dashboard</strong> - View your stats and progress</li>
+                            <li>View <strong>Journey</strong> - See your sessions over time</li>
+                            <li>Cloud sync - Access your data across devices</li>
+                        </ul>
+                        <p style="margin: 1rem 0 0 0; font-size: 0.9rem; color: var(--text-light);">Your data is securely stored and always accessible</p>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1)); border-radius: var(--radius-md);">
+                    <p style="margin-bottom: 1rem;">Ready to save your work and track your progress?</p>
+                    <button class="btn btn-primary" onclick="handleReturningUser()">Create Account or Sign In</button>
+                </div>
+
+                <div style="text-align: center;">
+                    <p style="color: var(--text-medium); margin-bottom: 1rem;">Want to explore first?</p>
+                    <button class="btn btn-secondary" onclick="showView('view-about')">Learn About MAGIE</button>
+                    <button class="btn btn-secondary" onclick="showPrimerWizard()" style="margin-left: 0.5rem;">Build Your Primer</button>
+                </div>
+            </div>
+        </section>
+
         <!-- DASHBOARD -->
         <section id="view-dashboard" class="view">
             <div class="dashboard-header">
                 <h1>Welcome Back, <span id="dashboard-name">Friend</span></h1>
                 <div>
                     <button class="btn-text" onclick="showView('view-resources')">Resources</button>
+                    <a href="https://forms.gle/GvDCFzA5mrE9jSJB9" target="_blank" class="btn-text" style="text-decoration: none;">💬 Feedback</a>
                     <button class="btn-text" id="sign-out-btn" onclick="handleSignOut()" style="display:none; margin-left: 1rem; color: var(--text-light);">Sign Out</button>
                 </div>
             </div>
@@ -862,6 +913,21 @@
                 <div class="breath-timer" id="breath-timer">2</div>
             </div>
             <div class="breath-count">Cycle <span id="breath-count">1</span> of 6</div>
+        </div>
+    </div>
+
+    <!-- Save to Sign In Modal -->
+    <div id="save-signin-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeSaveSigninModal()">×</button>
+            <h2>Save Your Progress</h2>
+            <p style="color: var(--text-medium); margin-bottom: 1.5rem;">To save your work and track your journey, create an account or sign in. Your data will be securely stored and accessible from any device.</p>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn btn-primary" onclick="promptSignIn()">Sign In</button>
+                <button class="btn btn-secondary" onclick="promptSignUp()">Create Account</button>
+            </div>
+            <p style="text-align: center; margin-top: 1.5rem; color: var(--text-light); font-size: 0.9rem;">Or continue without saving</p>
+            <button class="btn-text" onclick="closeSaveSigninModal()" style="display: block; margin: 0 auto;">Continue without saving</button>
         </div>
     </div>
 
