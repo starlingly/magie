@@ -1,0 +1,29 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#6366f1"/>
+
+  <!-- Gradient for depth -->
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#grad1)"/>
+
+  <!-- M circle -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="white" stroke-width="8"/>
+
+  <!-- Inner meditation circle with breathing effect -->
+  <circle cx="256" cy="256" r="120" fill="rgba(255,255,255,0.1)"/>
+
+  <!-- Heart/light element in center -->
+  <path d="M 256 200 Q 256 160 280 160 Q 300 160 300 180 Q 300 160 320 160 Q 344 160 344 200 Q 344 240 256 320 Q 168 240 168 200 Q 168 160 192 160 Q 212 160 212 180 Q 212 160 232 160 Q 256 160 256 200 Z" fill="white" opacity="0.9"/>
+
+  <!-- Dots for MAGIE elements -->
+  <circle cx="180" cy="256" r="12" fill="white" opacity="0.7"/>
+  <circle cx="332" cy="256" r="12" fill="white" opacity="0.7"/>
+  <circle cx="256" cy="140" r="12" fill="white" opacity="0.7"/>
+  <circle cx="256" cy="372" r="12" fill="white" opacity="0.7"/>
+</svg>
