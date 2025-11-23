@@ -1129,15 +1129,8 @@ function nextStep(viewId) {
 }
 
 function startJourney() {
-    // If Supabase is configured and user not signed in, show auth modal
-    if (supabase && !currentUser) {
-        showAuthModal();
-        // Switch to sign up tab
-        const signupTab = document.querySelector('.auth-tab:nth-child(2)');
-        if (signupTab) signupTab.click();
-    } else {
-        showView('view-welcome');
-    }
+    // Allow unauthenticated users to start the onboarding journey
+    showView('view-welcome');
 }
 
 function handleReturningUser() {
