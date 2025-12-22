@@ -22,7 +22,7 @@ const SUPABASE_URL = RUNTIME_CONFIG.supabaseUrl || '';
 const SUPABASE_ANON_KEY = RUNTIME_CONFIG.supabaseAnonKey || '';
 
 // Initialize Supabase client
-let supabase = null;
+let supabaseClient = null;
 let currentUser = null;
 
 function setCloudStatus(status, message) {
@@ -45,7 +45,7 @@ function initSupabase() {
     }
 
     try {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: {
                 autoRefreshToken: true,
                 persistSession: true,
@@ -64,9 +64,9 @@ function initSupabase() {
 
 // Check authentication state on load
 async function checkAuth() {
-    if (!supabase) return null;
+    if (!supabaseClient) return null;
 
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
         currentUser = session.user;
         setCloudStatus('success', `Cloud sync active for ${currentUser.email}.`);
@@ -79,9 +79,9 @@ async function checkAuth() {
 
 // Listen for auth changes
 function setupAuthListener() {
-    if (!supabase) return;
+    if (!supabaseClient) return;
 
-    supabase.auth.onAuthStateChange((event, session) => {
+    supabaseClient.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN') {
             currentUser = session.user;
             console.log('User signed in:', currentUser.email);
@@ -106,7 +106,7 @@ function setupAuthListener() {
 
 // Handle password reset from email link
 async function checkForPasswordReset() {
-    if (!supabase) return;
+    if (!supabaseClient) return;
 
     // Check if there's a password reset token in the URL
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -220,7 +220,7 @@ async function handleSignUp(event) {
     event.preventDefault();
     clearAuthMessages();
 
-    if (!supabase) {
+    if (!supabaseClient) {
         showAuthError('Supabase is not configured. Please set up Supabase first.');
         return;
     }
@@ -235,7 +235,7 @@ async function handleSignUp(event) {
     }
 
     try {
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await supabaseClient.auth.signUp({
             email: email,
             password: password,
         });
@@ -263,7 +263,7 @@ async function handleSignIn(event) {
     event.preventDefault();
     clearAuthMessages();
 
-    if (!supabase) {
+    if (!supabaseClient) {
         showAuthError('Supabase is not configured. Please set up Supabase first.');
         return;
     }
@@ -272,7 +272,7 @@ async function handleSignIn(event) {
     const password = document.getElementById('signin-password').value;
 
     try {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
             email: email,
             password: password,
         });
@@ -291,10 +291,10 @@ async function handleSignIn(event) {
 }
 
 async function handleSignOut() {
-    if (!supabase) return;
+    if (!supabaseClient) return;
 
     try {
-        const { error } = await supabase.auth.signOut();
+        const { error } = await supabaseClient.auth.signOut();
         if (error) throw error;
 
         // Clear local storage and reload
@@ -310,7 +310,7 @@ async function handlePasswordReset(event) {
     event.preventDefault();
     clearAuthMessages();
 
-    if (!supabase) {
+    if (!supabaseClient) {
         showAuthError('Supabase is not configured. Please set up Supabase first.');
         return;
     }
@@ -318,7 +318,7 @@ async function handlePasswordReset(event) {
     const email = document.getElementById('reset-email').value;
 
     try {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
             redirectTo: `${window.location.origin}/magie`,
         });
 
@@ -342,7 +342,7 @@ async function handlePasswordUpdate(event) {
     event.preventDefault();
     clearAuthMessages();
 
-    if (!supabase) {
+    if (!supabaseClient) {
         showAuthError('Supabase is not configured. Please set up Supabase first.');
         return;
     }
@@ -356,7 +356,7 @@ async function handlePasswordUpdate(event) {
     }
 
     try {
-        const { error } = await supabase.auth.updateUser({
+        const { error } = await supabaseClient.auth.updateUser({
             password: newPassword
         });
 
@@ -2226,7 +2226,7 @@ async function handleChangePassword(event) {
         return;
     }
 
-    if (!supabase) {
+    if (!supabaseClient) {
         const errorEl = document.getElementById('password-change-error');
         errorEl.textContent = 'Authentication not available';
         errorEl.classList.remove('hidden');
@@ -2235,7 +2235,7 @@ async function handleChangePassword(event) {
 
     try {
         // First verify current password by attempting to sign in
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { error: signInError } = await supabaseClient.auth.signInWithPassword({
             email: currentUser.email,
             password: currentPassword
         });
@@ -2245,7 +2245,7 @@ async function handleChangePassword(event) {
         }
 
         // Update to new password
-        const { error: updateError } = await supabase.auth.updateUser({
+        const { error: updateError } = await supabaseClient.auth.updateUser({
             password: newPassword
         });
 
