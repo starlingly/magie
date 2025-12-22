@@ -4,7 +4,7 @@
 // Register service worker for offline support and PWA capabilities
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
+        navigator.serviceWorker.register('./service-worker.js')
             .then((registration) => {
                 console.log('[PWA] Service Worker registered successfully:', registration);
             })
