@@ -651,11 +651,11 @@ const MAGIE_Storage = {
 
     // Save primer to Supabase
     async syncPrimerToSupabase(primer) {
-        if (!supabase || !currentUser) return;
+        if (!supabaseClient || !currentUser) return;
 
         try {
             // Check if primer exists
-            const { data: existing } = await supabase
+            const { data: existing } = await supabaseClient
                 .from('primers')
                 .select('id')
                 .eq('user_id', currentUser.id)
@@ -676,7 +676,7 @@ const MAGIE_Storage = {
 
             if (existing) {
                 // Update existing primer
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('primers')
                     .update(primerData)
                     .eq('user_id', currentUser.id);
@@ -685,7 +685,7 @@ const MAGIE_Storage = {
             } else {
                 // Insert new primer
                 primerData.created_at = new Date().toISOString();
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('primers')
                     .insert([primerData]);
 
@@ -700,10 +700,10 @@ const MAGIE_Storage = {
 
     // Load primer from Supabase
     async loadPrimerFromSupabase() {
-        if (!supabase || !currentUser) return null;
+        if (!supabaseClient || !currentUser) return null;
 
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('primers')
                 .select('*')
                 .eq('user_id', currentUser.id)
@@ -742,7 +742,7 @@ const MAGIE_Storage = {
 
     // Sync session to Supabase
     async syncSessionToSupabase(session) {
-        if (!supabase || !currentUser) return;
+        if (!supabaseClient || !currentUser) return;
 
         try {
             const sessionData = {
@@ -752,7 +752,7 @@ const MAGIE_Storage = {
                 created_at: session.timestamp
             };
 
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('sessions')
                 .insert([sessionData]);
 
@@ -766,14 +766,14 @@ const MAGIE_Storage = {
 
     // Load sessions from Supabase
     async loadSessionsFromSupabase() {
-        if (!supabase || !currentUser) {
+        if (!supabaseClient || !currentUser) {
             console.log('Skipping session load - no supabase or user');
             return [];
         }
 
         try {
             console.log('Loading sessions from Supabase...');
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('sessions')
                 .select('*')
                 .eq('user_id', currentUser.id)
@@ -807,10 +807,10 @@ const MAGIE_Storage = {
 
     // Sync settings to Supabase
     async syncSettingsToSupabase(settings) {
-        if (!supabase || !currentUser) return;
+        if (!supabaseClient || !currentUser) return;
 
         try {
-            const { data: existing } = await supabase
+            const { data: existing } = await supabaseClient
                 .from('user_settings')
                 .select('id')
                 .eq('user_id', currentUser.id)
@@ -826,7 +826,7 @@ const MAGIE_Storage = {
             };
 
             if (existing) {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('user_settings')
                     .update(settingsData)
                     .eq('user_id', currentUser.id);
@@ -834,7 +834,7 @@ const MAGIE_Storage = {
                 if (error) throw error;
             } else {
                 settingsData.created_at = new Date().toISOString();
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('user_settings')
                     .insert([settingsData]);
 
@@ -849,10 +849,10 @@ const MAGIE_Storage = {
 
     // Load settings from Supabase
     async loadSettingsFromSupabase() {
-        if (!supabase || !currentUser) return null;
+        if (!supabaseClient || !currentUser) return null;
 
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('user_settings')
                 .select('*')
                 .eq('user_id', currentUser.id)
@@ -882,7 +882,7 @@ const MAGIE_Storage = {
 
     // Sync sessions to Supabase
     async syncSessionsToSupabase() {
-        if (!supabase || !currentUser) {
+        if (!supabaseClient || !currentUser) {
             console.log('Skipping session sync - no supabase or user');
             return;
         }
@@ -894,7 +894,7 @@ const MAGIE_Storage = {
             // Save each session to Supabase
             for (const session of sessions) {
                 // Check if session already exists
-                const { data: existing, error: selectError } = await supabase
+                const { data: existing, error: selectError } = await supabaseClient
                     .from('sessions')
                     .select('id')
                     .eq('id', session.id)
@@ -918,7 +918,7 @@ const MAGIE_Storage = {
                 if (existing) {
                     // Update existing session
                     console.log(`Updating session ${session.id}`);
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('sessions')
                         .update(sessionData)
                         .eq('id', session.id)
@@ -932,7 +932,7 @@ const MAGIE_Storage = {
                     // Insert new session
                     console.log(`Inserting new session ${session.id}`);
                     sessionData.id = session.id;
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('sessions')
                         .insert([sessionData]);
 
@@ -952,13 +952,13 @@ const MAGIE_Storage = {
 
     // Sync primer to Supabase
     async syncPrimerToSupabase() {
-        if (!supabase || !currentUser) return;
+        if (!supabaseClient || !currentUser) return;
 
         try {
             const primer = this.getPrimer();
             if (!primer) return;
 
-            const { data: existing } = await supabase
+            const { data: existing } = await supabaseClient
                 .from('primers')
                 .select('id')
                 .eq('user_id', currentUser.id)
@@ -976,7 +976,7 @@ const MAGIE_Storage = {
             };
 
             if (existing) {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('primers')
                     .update(primerData)
                     .eq('user_id', currentUser.id);
@@ -984,7 +984,7 @@ const MAGIE_Storage = {
                 if (error) throw error;
             } else {
                 primerData.created_at = new Date().toISOString();
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('primers')
                     .insert([primerData]);
 
@@ -1004,7 +1004,7 @@ MAGIE_Storage.init();
 /* ===== Load User Data from Supabase ===== */
 
 async function loadUserDataFromSupabase() {
-    if (!supabase || !currentUser) return;
+    if (!supabaseClient || !currentUser) return;
 
     console.log('Loading user data from Supabase...');
 
@@ -1026,7 +1026,7 @@ async function loadUserDataFromSupabase() {
 /* ===== Sync User Data to Supabase ===== */
 
 async function syncUserDataToSupabase() {
-    if (!supabase || !currentUser) return;
+    if (!supabaseClient || !currentUser) return;
 
     console.log('Syncing user data to Supabase...');
 
@@ -1159,7 +1159,7 @@ function startJourney() {
 
 function handleReturningUser() {
     // If Supabase is configured, show sign in modal
-    if (supabase) {
+    if (supabaseClient) {
         if (currentUser) {
             // Already signed in, go to dashboard
             showDashboard();
@@ -1329,7 +1329,7 @@ async function saveCurrentPrimerSection() {
     const updatedPrimer = MAGIE_Storage.savePrimer(updates);
 
     // Sync to Supabase if available
-    if (supabase && currentUser) {
+    if (supabaseClient && currentUser) {
         await MAGIE_Storage.syncPrimerToSupabase(updatedPrimer);
     }
 }
@@ -1376,7 +1376,7 @@ async function completePrimer() {
     const primer = MAGIE_Storage.getPrimer();
 
     // Sync to Supabase if available
-    if (supabase && currentUser) {
+    if (supabaseClient && currentUser) {
         await MAGIE_Storage.syncPrimerToSupabase(primer);
         await MAGIE_Storage.syncSettingsToSupabase({ showCrisisBanner: true });
     }
@@ -1494,7 +1494,7 @@ function showDashboard() {
 
     // Show sign-out button if user is signed in
     const signOutBtn = document.getElementById('sign-out-btn');
-    if (signOutBtn && supabase && currentUser) {
+    if (signOutBtn && supabaseClient && currentUser) {
         signOutBtn.style.display = 'inline-block';
     }
 
@@ -1519,7 +1519,7 @@ async function startSession() {
         });
 
         // Sync to Supabase if available
-        if (supabase && currentUser) {
+        if (supabaseClient && currentUser) {
             await MAGIE_Storage.syncSessionToSupabase(session);
         }
     }
@@ -1776,7 +1776,7 @@ async function saveReflection() {
         console.log('Reflection saved to localStorage');
 
         // Sync to Supabase if available and WAIT for it to complete
-        if (supabase && currentUser) {
+        if (supabaseClient && currentUser) {
             console.log('Starting Supabase sync...');
             await syncUserDataToSupabase();
             console.log('Supabase sync completed');
@@ -2175,7 +2175,7 @@ async function saveAccountProfile() {
     });
 
     // Save to Supabase if available
-    if (supabase && currentUser) {
+    if (supabaseClient && currentUser) {
         await MAGIE_Storage.syncSettingsToSupabase({
             userName: name,
             pronouns: pronouns,
