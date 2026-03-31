@@ -746,10 +746,13 @@ const MAGIE_Storage = {
 
         try {
             const sessionData = {
+                id: session.id,
                 user_id: currentUser.id,
                 session_type: session.type,
                 note: session.note,
-                created_at: session.timestamp
+                reflection: session.reflection || null,
+                created_at: session.timestamp,
+                updated_at: new Date().toISOString()
             };
 
             const { error } = await supabaseClient
