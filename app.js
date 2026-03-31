@@ -52,6 +52,14 @@ function initSupabase() {
                 detectSessionInUrl: true
             }
         });
+
+        // Verify the client was created properly
+        if (typeof supabaseClient.from !== 'function') {
+            console.error('Supabase client missing .from() method — client may be corrupted');
+            supabaseClient = null;
+            return false;
+        }
+
         console.log('Supabase initialized successfully');
         setCloudStatus('success', 'Cloud sync available. Sign in to enable syncing across devices.');
         return true;
@@ -1801,8 +1809,10 @@ async function saveReflection() {
         }, 2500);
     } catch (error) {
         console.error('Error saving reflection:', error);
-        alert('Error saving reflection: ' + error.message);
+        // Note was already saved to localStorage — only the cloud sync failed
+        showToast('Note saved locally. Cloud sync failed — it will retry next time.');
         isSavingReflection = false;
+        showDashboard();
     }
 }
 
