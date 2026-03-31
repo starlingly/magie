@@ -1,4 +1,4 @@
-const CACHE_NAME = 'magie-v1';
+const CACHE_NAME = 'magie-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
