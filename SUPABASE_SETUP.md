@@ -167,11 +167,18 @@ ALTER TABLE sessions
 ADD COLUMN IF NOT EXISTS reflection JSONB,
 ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
--- Add updated_at trigger for sessions table
-CREATE TRIGGER IF NOT EXISTS update_sessions_updated_at
-  BEFORE UPDATE ON sessions
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+-- Add updated_at trigger for sessions table (skip if already exists)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'update_sessions_updated_at'
+  ) THEN
+    CREATE TRIGGER update_sessions_updated_at
+      BEFORE UPDATE ON sessions
+      FOR EACH ROW
+      EXECUTE FUNCTION update_updated_at_column();
+  END IF;
+END $$;
 
 -- Add new profile fields to existing user_settings table
 ALTER TABLE user_settings
