@@ -57,7 +57,9 @@ CREATE TABLE sessions (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   session_type TEXT,
   note TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  reflection JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Create user_settings table
@@ -141,6 +143,11 @@ CREATE TRIGGER update_primers_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_sessions_updated_at
+  BEFORE UPDATE ON sessions
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_user_settings_updated_at
   BEFORE UPDATE ON user_settings
   FOR EACH ROW
@@ -152,9 +159,27 @@ CREATE TRIGGER update_user_settings_updated_at
 
 ### Already Created Your Tables?
 
-If you already created the `user_settings` table before, you need to add the new columns. Run this SQL:
+If you already created your tables before, you may need to add missing columns. Run this SQL in the **SQL Editor**:
 
 ```sql
+-- Add reflection and updated_at columns to existing sessions table
+ALTER TABLE sessions
+ADD COLUMN IF NOT EXISTS reflection JSONB,
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+-- Add updated_at trigger for sessions table (skip if already exists)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'update_sessions_updated_at'
+  ) THEN
+    CREATE TRIGGER update_sessions_updated_at
+      BEFORE UPDATE ON sessions
+      FOR EACH ROW
+      EXECUTE FUNCTION update_updated_at_column();
+  END IF;
+END $$;
+
 -- Add new profile fields to existing user_settings table
 ALTER TABLE user_settings
 ADD COLUMN IF NOT EXISTS user_name TEXT,
